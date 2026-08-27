@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../data/models/invoice.dart';
 import '../views/home_view.dart';
+import '../views/invoice_detail_view.dart';
+import '../views/invoice_form_view.dart';
 import '../views/login_view.dart';
 import '../views/root_view.dart';
 
@@ -45,7 +47,24 @@ class AppRouter {
         return _page(const LoginView(), settings);
       case AppRoutes.home:
         return _page(const HomeView(), settings);
-      // TODO(flujo): registrar aquí el detalle y el formulario de factura.
+      case AppRoutes.invoiceDetail:
+        final args = settings.arguments;
+        if (args is! InvoiceDetailArgs) {
+          return _page(
+            const _RouteErrorView(
+              message: 'Falta el identificador de la factura.',
+            ),
+            settings,
+          );
+        }
+        return _page(
+          InvoiceDetailView(invoiceId: args.invoiceId, initial: args.initial),
+          settings,
+        );
+      case AppRoutes.invoiceForm:
+        final args = settings.arguments;
+        final existing = args is InvoiceFormArgs ? args.existing : null;
+        return _page(InvoiceFormView(existing: existing), settings);
       default:
         return _page(
           _RouteErrorView(message: 'La ruta ${settings.name} no existe.'),
