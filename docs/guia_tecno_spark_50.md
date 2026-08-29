@@ -44,11 +44,14 @@ opción, usa el buscador de Ajustes.
 flutter devices
 ```
 
-Debe aparecer algo como:
+El Spark 50 **no se anuncia con su nombre comercial**, sino con su código de
+modelo `KN8`:
 
 ```
-TECNO SPARK 50 (mobile) • ABCD1234567890 • android-arm64 • Android 15 (API 35)
+TECNO KN8 (mobile) • 1638515626004918 • android-arm64 • Android 16 (API 36)
 ```
+
+El número largo es el identificador que se le pasa a `-d`.
 
 Si no aparece:
 
@@ -64,10 +67,18 @@ adb kill-server && adb devices   # reinicia el puente ADB
 
 ### Opción A — Desarrollo con hot reload (recomendada)
 
-```bash
+Ejecuta siempre desde la **raíz del proyecto**, no desde `C:\src`; si no, sale
+`Error: No pubspec.yaml file found`:
+
+```powershell
+cd C:\src\factura_flow_mobile
 flutter pub get
-flutter run -d <id-del-dispositivo>
+flutter run -d <id>     # <id> = la segunda columna de `flutter devices`
 ```
+
+El `<id>` **no es fijo**: cambia según el teléfono conectado, así que consúltalo
+con `flutter devices` cada vez que cambies de equipo. Con un solo móvil
+conectado basta con `flutter run`.
 
 Con la app corriendo: `r` = hot reload, `R` = hot restart, `q` = salir.
 
@@ -142,6 +153,9 @@ Android bloquea el tráfico sin TLS salvo que se configure
 
 | Síntoma | Causa y solución |
 | --- | --- |
+| `No pubspec.yaml file found` | Estás fuera de la carpeta del proyecto. `cd C:\src\factura_flow_mobile; flutter run` (en PowerShell el separador es `;`, no `&&`). |
+| El teléfono no aparece por su nombre | Es normal: se identifica como `TECNO KN8`, no como «Spark 50». |
+| `Device <id> not found` | Ese id era de otro teléfono. Vuelve a mirar `flutter devices`: el id cambia con el equipo conectado. |
 | `No devices found` | Cable de solo carga, o falta aceptar el diálogo de depuración USB. Cambia el modo USB a MTP. |
 | `INSTALL_FAILED_USER_RESTRICTED` | Falta activar **Instalar vía USB** en Opciones de desarrollador (típico de HiOS). |
 | `INSTALL_FAILED_UPDATE_INCOMPATIBLE` | Ya hay una versión firmada distinta: `adb uninstall com.example.factura_flow_mobile`. |
