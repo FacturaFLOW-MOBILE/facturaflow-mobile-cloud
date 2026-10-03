@@ -126,6 +126,16 @@ void main() {
       expect(result.failureOrNull, isA<ValidationFailure>());
     });
 
+    test('el rechazo exige una justificación, no un carácter suelto', () async {
+      final result = await repository.reject('inv-b', contador, reason: '.');
+
+      expect(result.failureOrNull, isA<ValidationFailure>());
+      expect(result.failureOrNull!.message, contains('10'));
+      // La factura no cambió de estado.
+      final actual = await repository.getById('inv-b');
+      expect(actual.valueOrNull?.status, InvoiceStatus.enviada);
+    });
+
     test('el rechazo guarda el motivo en la factura', () async {
       final result = await repository.reject(
         'inv-b',

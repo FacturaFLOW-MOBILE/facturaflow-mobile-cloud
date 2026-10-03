@@ -89,11 +89,13 @@ class InvoiceDetailViewModel extends BaseViewModel {
   Future<Result<Invoice>> approve({String? comment}) =>
       _act(() => _repository.approve(_invoiceId, _user, comment: comment));
 
+  /// Rechaza la factura. El motivo debe ser una justificación real: ver
+  /// [Invoice.rejectionReasonError].
   Future<Result<Invoice>> reject(String reason) {
-    if (reason.trim().isEmpty) {
-      const message = 'Debes indicar el motivo del rechazo.';
-      setError(message);
-      return Future.value(const Err(ValidationFailure(message)));
+    final problem = Invoice.rejectionReasonError(reason);
+    if (problem != null) {
+      setError(problem);
+      return Future.value(Err(ValidationFailure(problem)));
     }
     return _act(() => _repository.reject(_invoiceId, _user, reason: reason));
   }

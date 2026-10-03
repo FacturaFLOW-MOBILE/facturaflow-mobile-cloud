@@ -172,10 +172,9 @@ class DemoInvoiceRepository implements InvoiceRepository {
     required String reason,
   }) async {
     await _delay();
-    if (reason.trim().isEmpty) {
-      return const Err(
-        ValidationFailure('Debes indicar el motivo del rechazo.'),
-      );
+    final problem = Invoice.rejectionReasonError(reason);
+    if (problem != null) {
+      return Err(ValidationFailure(problem));
     }
     return _review(
       id,
