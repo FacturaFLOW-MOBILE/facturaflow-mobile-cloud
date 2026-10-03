@@ -14,21 +14,21 @@ void main() {
     repository = DemoInvoiceRepository(
       config: AppConfig.test(),
       clock: testClock,
-      initialInvoices: [buildInvoice(id: 'inv-1', number: 'FE-1')],
+      initialInvoices: [buildInvoice(id: 'inv-1', number: 'FE-1', supplierTaxId: '900000000-5')],
     );
   });
 
   InvoiceFormViewModel newForm() => InvoiceFormViewModel(
-        repository: repository,
-        user: emisor,
-        clock: testClock,
-      );
+    repository: repository,
+    user: emisor,
+    clock: testClock,
+  );
 
   void fillValidFields(InvoiceFormViewModel viewModel) {
     viewModel
       ..setNumber('FE-2026')
       ..setSupplierName('Proveedor S.A.S.')
-      ..setSupplierTaxId('900123456-7')
+      ..setSupplierTaxId('900123456-8')
       ..addItem(
         const InvoiceItem(
           description: 'Servicio',
@@ -43,11 +43,7 @@ void main() {
     expect(viewModel.totalCents, 0);
 
     viewModel.addItem(
-      const InvoiceItem(
-        description: 'A',
-        quantity: 2,
-        unitPriceCents: 100000,
-      ),
+      const InvoiceItem(description: 'A', quantity: 2, unitPriceCents: 100000),
     );
 
     expect(viewModel.subtotalCents, 200000);
@@ -127,11 +123,46 @@ void main() {
     viewModel.dispose();
   });
 
+  test('un DV incorrecto bloquea el guardado y el envío', () async {
+    final viewModel = newForm();
+    fillValidFields(viewModel);
+    viewModel.setSupplierTaxId('900123456-7');
+    expect(viewModel.canSubmitForReview, isFalse);
+    final result = await viewModel.saveAndSubmit();
+    expect(result.failureOrNull, isA<ValidationFailure>());
+    expect(repository.snapshot, hasLength(1));
+    viewModel.dispose();
+  });
+
+  test(
+    'valida agrupación, longitud y DV sin consultar registro tributario',
+    () {
+      final viewModel = newForm();
+      for (final nit in ['900123456', '900.123.456-8', '900123456-8']) {
+        expect(viewModel.validateSupplierTaxId(nit), isNull, reason: nit);
+      }
+      for (final nit in [
+        '900123456-7',
+        '.....',
+        '-----',
+        '900..123456',
+        '900-123-456',
+        '00000',
+        '1234',
+        '1234567890123456',
+        '900123456-88',
+      ]) {
+        expect(viewModel.validateSupplierTaxId(nit), isNotNull, reason: nit);
+      }
+      viewModel.dispose();
+    },
+  );
+
   test('valida el formato del NIT', () {
     final viewModel = newForm();
 
     expect(viewModel.validateSupplierTaxId('abc'), isNotNull);
-    expect(viewModel.validateSupplierTaxId('900123456-7'), isNull);
+    expect(viewModel.validateSupplierTaxId('900123456-8'), isNull);
     viewModel.dispose();
   });
 }

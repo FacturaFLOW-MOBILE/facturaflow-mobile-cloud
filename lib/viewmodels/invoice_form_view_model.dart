@@ -15,13 +15,13 @@ class InvoiceFormViewModel extends BaseViewModel {
     required this._user,
     Invoice? existing,
     DateTime Function()? clock,
-  })  : _existing = existing,
-        _number = existing?.number ?? '',
-        _supplierName = existing?.supplierName ?? '',
-        _supplierTaxId = existing?.supplierTaxId ?? '',
-        _notes = existing?.notes ?? '',
-        _issueDate = existing?.issueDate ?? (clock ?? DateTime.now)(),
-        _items = List<InvoiceItem>.from(existing?.items ?? const []);
+  }) : _existing = existing,
+       _number = existing?.number ?? '',
+       _supplierName = existing?.supplierName ?? '',
+       _supplierTaxId = existing?.supplierTaxId ?? '',
+       _notes = existing?.notes ?? '',
+       _issueDate = existing?.issueDate ?? (clock ?? DateTime.now)(),
+       _items = List<InvoiceItem>.from(existing?.items ?? const []);
 
   final InvoiceRepository _repository;
   final AppUser _user;
@@ -115,8 +115,47 @@ class InvoiceFormViewModel extends BaseViewModel {
   String? validateSupplierTaxId(String? value) {
     final text = (value ?? '').trim();
     if (text.isEmpty) return 'El NIT del proveedor es obligatorio.';
-    if (!RegExp(r'^[0-9.\-]{5,20}$').hasMatch(text)) {
-      return 'El NIT solo admite números, puntos y guion.';
+    // Acepta NIT sin DV o con DV separado por guion; puntos solo por miles.
+    final match = RegExp(r'^(\d{5,15}|\d{1,3}(?:\.\d{3}){1,4})(?:-(\d))?$')
+        .firstMatch(text);
+    if (match == null) {
+      return 'Usa un NIT numérico y, si incluyes el DV, sepáralo con guion.';
+    }
+    final digits = match.group(1)!.replaceAll('.', '');
+    if (digits.length < 5 ||
+        digits.length > 15 ||
+        RegExp(r'^0+$').hasMatch(digits)) {
+      return 'El NIT debe tener entre 5 y 15 dígitos y no puede ser cero.';
+    }
+    final suppliedDv = match.group(2);
+    if (suppliedDv != null) {
+      // Pesos de derecha a izquierda del algoritmo módulo 11 de la DIAN.
+      const weights = [
+        3,
+        7,
+        13,
+        17,
+        19,
+        23,
+        29,
+        37,
+        41,
+        43,
+        47,
+        53,
+        59,
+        67,
+        71,
+      ];
+      var sum = 0;
+      for (var i = 0; i < digits.length; i++) {
+        sum += int.parse(digits[digits.length - 1 - i]) * weights[i];
+      }
+      final remainder = sum % 11;
+      final expectedDv = remainder > 1 ? 11 - remainder : remainder;
+      if (int.parse(suppliedDv) != expectedDv) {
+        return 'El dígito de verificación del NIT no es válido.';
+      }
     }
     return null;
   }
@@ -142,9 +181,11 @@ class InvoiceFormViewModel extends BaseViewModel {
       return Err(ValidationFailure(blocking));
     }
     final draft = _buildDraft();
-    return runGuarded(() => isEditing
-        ? _repository.update(_existing!.id, draft, _user)
-        : _repository.create(draft, _user));
+    return runGuarded(
+      () => isEditing
+          ? _repository.update(_existing!.id, draft, _user)
+          : _repository.create(draft, _user),
+    );
   }
 
   /// Guarda y envía a revisión en una sola acción.
@@ -166,11 +207,11 @@ class InvoiceFormViewModel extends BaseViewModel {
       validateSupplierTaxId(_supplierTaxId);
 
   InvoiceDraft _buildDraft() => InvoiceDraft(
-        number: _number,
-        supplierName: _supplierName,
-        supplierTaxId: _supplierTaxId,
-        issueDate: _issueDate,
-        items: List<InvoiceItem>.unmodifiable(_items),
-        notes: _notes,
-      );
+    number: _number,
+    supplierName: _supplierName,
+    supplierTaxId: _supplierTaxId,
+    issueDate: _issueDate,
+    items: List<InvoiceItem>.unmodifiable(_items),
+    notes: _notes,
+  );
 }
