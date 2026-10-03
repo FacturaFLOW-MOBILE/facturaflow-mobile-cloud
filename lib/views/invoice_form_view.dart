@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../app/design_tokens.dart';
@@ -118,7 +119,7 @@ class _InvoiceFormState extends State<_InvoiceForm> {
             ),
           ),
         );
-        Navigator.of(context).pop(value);
+        context.pop(value);
       case Err<Invoice>(:final failure):
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()

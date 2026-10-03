@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/models/invoice.dart';
 import '../views/home_view.dart';
@@ -7,79 +8,114 @@ import '../views/invoice_form_view.dart';
 import '../views/login_view.dart';
 import '../views/root_view.dart';
 
-/// Nombres de las rutas de la aplicación.
-class AppRoutes {
-  const AppRoutes._();
+/// Rutas de la aplicación.
+///
+/// Cada destino declara su nombre y su patrón de URL en un solo sitio: las
+/// vistas navegan por la extensión [AppNavigation] y nunca escriben una ruta
+/// a mano.
+enum AppRoute {
+  root('root', '/'),
+  login('login', '/login'),
+  home('home', '/home'),
 
-  static const String root = '/';
-  static const String login = '/login';
-  static const String home = '/home';
-  static const String invoiceDetail = '/invoices/detail';
-  static const String invoiceForm = '/invoices/form';
+  /// El formulario se declara con una ruta propia, sin parámetro, para que no
+  /// compita con el patrón del detalle.
+  invoiceForm('invoice-form', '/invoices/form'),
+  invoiceDetail('invoice-detail', '/invoices/detail/:$invoiceIdParam');
+
+  const AppRoute(this.routeName, this.path);
+
+  /// Nombre del parámetro de ruta que identifica la factura.
+  static const String invoiceIdParam = 'id';
+
+  /// Nombre con el que `go_router` resuelve el destino.
+  final String routeName;
+
+  /// Patrón de URL del destino.
+  final String path;
 }
 
-/// Argumentos de [AppRoutes.invoiceDetail].
-class InvoiceDetailArgs {
-  const InvoiceDetailArgs({required this.invoiceId, this.initial});
-
-  final String invoiceId;
-
-  /// Factura ya cargada por la lista, para pintar el detalle sin esperar.
-  final Invoice? initial;
-}
-
-/// Argumentos de [AppRoutes.invoiceForm]. `existing == null` crea una nueva.
-class InvoiceFormArgs {
-  const InvoiceFormArgs({this.existing});
-
-  final Invoice? existing;
-}
-
-/// Resolución centralizada de rutas con nombre.
+/// Construye el enrutador de la aplicación.
+///
+/// La tabla es declarativa: agregar un destino es agregar un [GoRoute], no
+/// extender una cadena de `case`.
 class AppRouter {
   const AppRouter._();
 
-  static Route<dynamic> onGenerateRoute(RouteSettings settings) {
-    switch (settings.name) {
-      case AppRoutes.root:
-        return _page(const RootView(), settings);
-      case AppRoutes.login:
-        return _page(const LoginView(), settings);
-      case AppRoutes.home:
-        return _page(const HomeView(), settings);
-      case AppRoutes.invoiceDetail:
-        final args = settings.arguments;
-        if (args is! InvoiceDetailArgs) {
-          return _page(
-            const _RouteErrorView(
-              message: 'Falta el identificador de la factura.',
+  static GoRouter create() => GoRouter(
+        initialLocation: AppRoute.root.path,
+        routes: [
+          GoRoute(
+            name: AppRoute.root.routeName,
+            path: AppRoute.root.path,
+            builder: (_, _) => const RootView(),
+          ),
+          GoRoute(
+            name: AppRoute.login.routeName,
+            path: AppRoute.login.path,
+            builder: (_, _) => const LoginView(),
+          ),
+          GoRoute(
+            name: AppRoute.home.routeName,
+            path: AppRoute.home.path,
+            builder: (_, _) => const HomeView(),
+          ),
+          GoRoute(
+            name: AppRoute.invoiceForm.routeName,
+            path: AppRoute.invoiceForm.path,
+            // `extra` trae la factura a editar; si es null, se crea una nueva.
+            builder: (_, state) =>
+                InvoiceFormView(existing: state.extra as Invoice?),
+          ),
+          GoRoute(
+            name: AppRoute.invoiceDetail.routeName,
+            path: AppRoute.invoiceDetail.path,
+            builder: (_, state) => InvoiceDetailView(
+              invoiceId: state.pathParameters[AppRoute.invoiceIdParam]!,
+              // La lista ya tiene la factura cargada: se pasa para pintar el
+              // detalle sin esperar a la recarga.
+              initial: state.extra as Invoice?,
             ),
-            settings,
-          );
-        }
-        return _page(
-          InvoiceDetailView(invoiceId: args.invoiceId, initial: args.initial),
-          settings,
-        );
-      case AppRoutes.invoiceForm:
-        final args = settings.arguments;
-        final existing = args is InvoiceFormArgs ? args.existing : null;
-        return _page(InvoiceFormView(existing: existing), settings);
-      default:
-        return _page(
-          _RouteErrorView(message: 'La ruta ${settings.name} no existe.'),
-          settings,
-        );
-    }
-  }
-
-  static MaterialPageRoute<dynamic> _page(Widget child, RouteSettings settings) =>
-      MaterialPageRoute<dynamic>(builder: (_) => child, settings: settings);
+          ),
+        ],
+        errorBuilder: (_, state) => RouteErrorView(
+          message: 'La ruta ${state.uri} no existe.',
+        ),
+      );
 }
 
-/// Pantalla mostrada cuando una ruta es desconocida o le faltan argumentos.
-class _RouteErrorView extends StatelessWidget {
-  const _RouteErrorView({required this.message});
+/// Navegación tipada.
+///
+/// Las vistas llaman a estos métodos en vez de componer rutas con cadenas y
+/// castear `arguments`: el destino y el tipo del resultado quedan fijados aquí.
+extension AppNavigation on BuildContext {
+  /// Abre el detalle de [invoice]. Devuelve `true` si la factura cambió.
+  Future<bool> pushInvoiceDetail(Invoice invoice) async {
+    final changed = await GoRouter.of(this).pushNamed<Object?>(
+      AppRoute.invoiceDetail.routeName,
+      pathParameters: {AppRoute.invoiceIdParam: invoice.id},
+      extra: invoice,
+    );
+    return changed == true;
+  }
+
+  /// Abre el formulario de facturas.
+  ///
+  /// Con [existing] edita esa factura; sin él crea una nueva. Devuelve la
+  /// factura guardada, o `null` si se canceló.
+  Future<Invoice?> pushInvoiceForm({Invoice? existing}) =>
+      GoRouter.of(this).pushNamed<Invoice?>(
+        AppRoute.invoiceForm.routeName,
+        extra: existing,
+      );
+
+  /// Vuelve a la raíz descartando la pila actual.
+  void goToRoot() => GoRouter.of(this).goNamed(AppRoute.root.routeName);
+}
+
+/// Pantalla mostrada cuando una ruta es desconocida.
+class RouteErrorView extends StatelessWidget {
+  const RouteErrorView({required this.message, super.key});
 
   final String message;
 
@@ -102,8 +138,7 @@ class _RouteErrorView extends StatelessWidget {
               Text(message, textAlign: TextAlign.center),
               const SizedBox(height: 24),
               OutlinedButton(
-                onPressed: () => Navigator.of(context)
-                    .pushNamedAndRemoveUntil(AppRoutes.root, (_) => false),
+                onPressed: context.goToRoot,
                 child: const Text('Volver al inicio'),
               ),
             ],

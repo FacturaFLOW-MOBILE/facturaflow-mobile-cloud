@@ -40,19 +40,13 @@ class _HomeBody extends StatelessWidget {
 
   Future<void> _openDetail(BuildContext context, Invoice invoice) async {
     final viewModel = context.read<InvoiceListViewModel>();
-    final changed = await Navigator.of(context).pushNamed<dynamic>(
-      AppRoutes.invoiceDetail,
-      arguments: InvoiceDetailArgs(invoiceId: invoice.id, initial: invoice),
-    );
-    if (changed == true) await viewModel.refresh();
+    final changed = await context.pushInvoiceDetail(invoice);
+    if (changed) await viewModel.refresh();
   }
 
   Future<void> _createInvoice(BuildContext context) async {
     final viewModel = context.read<InvoiceListViewModel>();
-    final created = await Navigator.of(context).pushNamed<dynamic>(
-      AppRoutes.invoiceForm,
-      arguments: const InvoiceFormArgs(),
-    );
+    final created = await context.pushInvoiceForm();
     if (created != null) await viewModel.refresh();
   }
 
