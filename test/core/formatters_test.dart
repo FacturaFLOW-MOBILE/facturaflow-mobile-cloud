@@ -9,6 +9,10 @@ void main() {
       expect(Formatters.money(0), r'$ 0,00');
     });
 
+    test('respeta símbolos personalizados', () {
+      expect(Formatters.money(123456, symbol: 'COP'), 'COP 1.234,56');
+    });
+
     test('conserva el signo negativo', () {
       expect(Formatters.money(-5050), r'-$ 50,50');
     });
@@ -33,7 +37,10 @@ void main() {
     });
 
     test('es la operación inversa de centsToInput', () {
-      expect(Formatters.centsFromInput(Formatters.centsToInput(987654)), 987654);
+      expect(
+        Formatters.centsFromInput(Formatters.centsToInput(987654)),
+        987654,
+      );
     });
   });
 
