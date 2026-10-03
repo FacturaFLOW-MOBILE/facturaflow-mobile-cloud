@@ -1,8 +1,12 @@
 // Pruebas del enrutador: la tabla de rutas y la navegación tipada.
 import 'package:factura_flow_mobile/app/app.dart';
-import 'package:factura_flow_mobile/app/dependencies.dart';
+
+import '../helpers/demo_dependencies.dart';
+
 import 'package:factura_flow_mobile/app/routes.dart';
-import 'package:factura_flow_mobile/data/demo/demo_seed.dart';
+
+import '../helpers/demo_fixture.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -43,9 +47,8 @@ void main() {
 
   group('Navegación', () {
     Future<GoRouter> pumpApp(WidgetTester tester) async {
-      await tester.pumpWidget(
-        FacturaFlowApp(dependencies: Dependencies.forTests()),
-      );
+      final dependencies = await tester.runAsync(loadDemoDependencies);
+      await tester.pumpWidget(FacturaFlowApp(dependencies: dependencies!));
       await tester.pumpAndSettle();
       return GoRouter.of(tester.element(find.byType(Scaffold).first));
     }
@@ -57,24 +60,23 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('abrir una factura lleva a la URL de su detalle',
-        (tester) async {
+    testWidgets('abrir una factura lleva a la URL de su detalle', (
+      tester,
+    ) async {
       final router = await pumpApp(tester);
-      await signInAs(tester, DemoSeed.emisor.fullName);
+      await signInAs(tester, DemoFixture.emisor.fullName);
 
       await tester.tap(find.text('FE-1001'));
       await tester.pumpAndSettle();
 
-      expect(
-        router.state.uri.toString(),
-        '/invoices/detail/inv-1001',
-      );
+      expect(router.state.uri.toString(), '/invoices/detail/inv-1001');
     });
 
-    testWidgets('el botón "Nueva" lleva a la URL del formulario',
-        (tester) async {
+    testWidgets('el botón "Nueva" lleva a la URL del formulario', (
+      tester,
+    ) async {
       final router = await pumpApp(tester);
-      await signInAs(tester, DemoSeed.emisor.fullName);
+      await signInAs(tester, DemoFixture.emisor.fullName);
 
       await tester.tap(find.widgetWithText(FloatingActionButton, 'Nueva'));
       await tester.pumpAndSettle();
@@ -83,8 +85,9 @@ void main() {
       expect(find.text('Nueva factura'), findsOneWidget);
     });
 
-    testWidgets('una ruta desconocida muestra la pantalla de error',
-        (tester) async {
+    testWidgets('una ruta desconocida muestra la pantalla de error', (
+      tester,
+    ) async {
       final router = await pumpApp(tester);
 
       router.go('/ruta-que-no-existe');

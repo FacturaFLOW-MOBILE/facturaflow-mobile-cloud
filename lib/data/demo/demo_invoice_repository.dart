@@ -15,10 +15,10 @@ class DemoInvoiceRepository implements InvoiceRepository {
     AppConfig? config,
     DateTime Function()? clock,
     List<Invoice>? initialInvoices,
-  })  : _config = config ?? AppConfig.fromEnvironment(),
-        _clock = clock ?? DateTime.now {
-    final now = _clock();
-    _invoices.addAll(initialInvoices ?? DemoSeed.invoices(now));
+  }) : _config = config ?? AppConfig.fromEnvironment(),
+       _clock = clock ?? DateTime.now {
+    _needsSeed = initialInvoices == null;
+    _invoices.addAll(initialInvoices ?? const []);
     _sequence = _invoices.length + 1000;
   }
 
@@ -27,6 +27,17 @@ class DemoInvoiceRepository implements InvoiceRepository {
   final List<Invoice> _invoices = [];
 
   int _sequence = 1000;
+  late final bool _needsSeed;
+  Future<void>? _loading;
+
+  Future<void> _load() => _loading ??= _loadSeed();
+
+  Future<void> _loadSeed() async {
+    if (!_needsSeed) return;
+    final seed = await DemoSeed.load(now: _clock());
+    _invoices.addAll(seed.invoices);
+    _sequence = _invoices.length + 1000;
+  }
 
   /// Copia inmutable del estado actual, útil en pruebas.
   List<Invoice> get snapshot => List.unmodifiable(_invoices);
@@ -53,9 +64,7 @@ class DemoInvoiceRepository implements InvoiceRepository {
   Future<Result<Invoice>> create(InvoiceDraft draft, AppUser actor) async {
     await _delay();
     if (!actor.role.canCreateInvoices) {
-      return const Err(
-        PermissionFailure('Tu rol no permite crear facturas.'),
-      );
+      return const Err(PermissionFailure('Tu rol no permite crear facturas.'));
     }
     final now = _clock();
     _sequence++;
@@ -108,14 +117,8 @@ class DemoInvoiceRepository implements InvoiceRepository {
         ),
       );
     }
-    if (_isDuplicate(
-      draft.number,
-      draft.supplierTaxId,
-      exceptId: id,
-    )) {
-      return Err(
-        _duplicateFailure(draft.number, draft.supplierTaxId),
-      );
+    if (_isDuplicate(draft.number, draft.supplierTaxId, exceptId: id)) {
+      return Err(_duplicateFailure(draft.number, draft.supplierTaxId));
     }
     final updated = current.copyWith(
       number: draft.number.trim(),
@@ -138,7 +141,9 @@ class DemoInvoiceRepository implements InvoiceRepository {
     final current = _invoices[index];
     if (!current.canBeEditedBy(actor)) {
       return const Err(
-        PermissionFailure('Solo el emisor puede enviar esta factura a revisión.'),
+        PermissionFailure(
+          'Solo el emisor puede enviar esta factura a revisión.',
+        ),
       );
     }
     final errors = current.validationErrors();
@@ -281,10 +286,12 @@ class DemoInvoiceRepository implements InvoiceRepository {
   /// el mismo consecutivo.
   static String _normalizeNumber(String number) => number.trim().toUpperCase();
 
-  int _indexOf(String id) => _invoices.indexWhere((invoice) => invoice.id == id);
+  int _indexOf(String id) =>
+      _invoices.indexWhere((invoice) => invoice.id == id);
 
-  Future<void> _delay() {
-    if (_config.simulatedLatency == Duration.zero) return Future.value();
-    return Future<void>.delayed(_config.simulatedLatency);
+  Future<void> _delay() async {
+    await _load();
+    if (_config.simulatedLatency == Duration.zero) return;
+    await Future<void>.delayed(_config.simulatedLatency);
   }
 }

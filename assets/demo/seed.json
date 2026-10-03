@@ -1,0 +1,191 @@
+{
+  "users": [
+    {
+      "id": "u-ana",
+      "fullName": "Ana Torres",
+      "email": "ana@facturaflow.demo",
+      "role": "emisor",
+      "password": "demo1234"
+    },
+    {
+      "id": "u-carlos",
+      "fullName": "Carlos Ruiz",
+      "email": "carlos@facturaflow.demo",
+      "role": "contador",
+      "password": "demo1234"
+    },
+    {
+      "id": "u-lucia",
+      "fullName": "Lucía Peña",
+      "email": "lucia@facturaflow.demo",
+      "role": "administrador",
+      "password": "demo1234"
+    }
+  ],
+  "invoices": [
+    {
+      "id": "inv-1001",
+      "number": "FE-1001",
+      "supplierName": "Papelería La 45",
+      "supplierTaxId": "900123456-7",
+      "daysAgo": 2,
+      "status": "borrador",
+      "ownerId": "u-ana",
+      "notes": "Pendiente de adjuntar la orden de compra.",
+      "rejectionReason": null,
+      "items": [
+        {
+          "description": "Resma de papel carta",
+          "quantity": 12,
+          "unitPriceCents": 1850000,
+          "taxRate": 0.19
+        },
+        {
+          "description": "Tóner impresora láser",
+          "quantity": 2,
+          "unitPriceCents": 24500000,
+          "taxRate": 0.19
+        }
+      ],
+      "history": []
+    },
+    {
+      "id": "inv-1002",
+      "number": "FE-1002",
+      "supplierName": "Transportes Andinos S.A.S.",
+      "supplierTaxId": "901555222-1",
+      "daysAgo": 5,
+      "status": "enviada",
+      "ownerId": "u-ana",
+      "notes": "",
+      "rejectionReason": null,
+      "items": [
+        {
+          "description": "Flete Bogotá - Medellín",
+          "quantity": 1,
+          "unitPriceCents": 128000000,
+          "taxRate": 0.19
+        },
+        {
+          "description": "Seguro de carga",
+          "quantity": 1,
+          "unitPriceCents": 19500000,
+          "taxRate": 0.05
+        }
+      ],
+      "history": [
+        {
+          "hoursAgo": 96,
+          "actorId": "u-ana",
+          "status": "enviada",
+          "description": "Enviada a revisión",
+          "comment": null
+        }
+      ]
+    },
+    {
+      "id": "inv-1003",
+      "number": "FE-1003",
+      "supplierName": "Servicios Contables Delta",
+      "supplierTaxId": "830998877-3",
+      "daysAgo": 12,
+      "status": "aprobada",
+      "ownerId": "u-ana",
+      "notes": "",
+      "rejectionReason": null,
+      "items": [
+        {
+          "description": "Asesoría tributaria mensual",
+          "quantity": 1,
+          "unitPriceCents": 320000000,
+          "taxRate": 0.19
+        }
+      ],
+      "history": [
+        {
+          "hoursAgo": 264,
+          "actorId": "u-ana",
+          "status": "enviada",
+          "description": "Enviada a revisión",
+          "comment": null
+        },
+        {
+          "hoursAgo": 240,
+          "actorId": "u-carlos",
+          "status": "aprobada",
+          "description": "Aprobada por Carlos Ruiz",
+          "comment": "Soportes completos."
+        }
+      ]
+    },
+    {
+      "id": "inv-1004",
+      "number": "FE-1004",
+      "supplierName": "Cafetería El Roble",
+      "supplierTaxId": "1020304050",
+      "daysAgo": 8,
+      "status": "rechazada",
+      "ownerId": "u-ana",
+      "notes": "",
+      "rejectionReason": "El NIT del proveedor no coincide con el RUT.",
+      "items": [
+        {
+          "description": "Refrigerios capacitación",
+          "quantity": 40,
+          "unitPriceCents": 950000,
+          "taxRate": 0.19
+        }
+      ],
+      "history": [
+        {
+          "hoursAgo": 168,
+          "actorId": "u-ana",
+          "status": "enviada",
+          "description": "Enviada a revisión",
+          "comment": null
+        },
+        {
+          "hoursAgo": 144,
+          "actorId": "u-carlos",
+          "status": "rechazada",
+          "description": "Rechazada por Carlos Ruiz",
+          "comment": "El NIT del proveedor no coincide con el RUT."
+        }
+      ]
+    },
+    {
+      "id": "inv-1005",
+      "number": "FE-1005",
+      "supplierName": "Tecnología Integral Ltda.",
+      "supplierTaxId": "860111222-9",
+      "daysAgo": 1,
+      "status": "enviada",
+      "ownerId": "u-lucia",
+      "notes": "",
+      "rejectionReason": null,
+      "items": [
+        {
+          "description": "Licencia antivirus (10 equipos)",
+          "quantity": 10,
+          "unitPriceCents": 8900000,
+          "taxRate": 0.19
+        },
+        {
+          "description": "Soporte técnico remoto",
+          "quantity": 6,
+          "unitPriceCents": 12000000,
+          "taxRate": 0.19
+        }
+      ],
+      "history": [
+        {
+          "hoursAgo": 6,
+          "actorId": "u-lucia",
+          "status": "enviada",
+          "description": "Enviada a revisión",
+          "comment": null
+        }
+      ]
+    }
+  ]
+}

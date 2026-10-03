@@ -1,11 +1,12 @@
 import 'package:factura_flow_mobile/app/app_config.dart';
 import 'package:factura_flow_mobile/data/demo/demo_auth_repository.dart';
-import 'package:factura_flow_mobile/data/demo/demo_seed.dart';
+import '../helpers/demo_fixture.dart';
 import 'package:factura_flow_mobile/viewmodels/login_view_model.dart';
 import 'package:factura_flow_mobile/viewmodels/session_view_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late SessionViewModel session;
   late LoginViewModel viewModel;
 
@@ -46,18 +47,18 @@ void main() {
     });
 
     test('inicia sesión con una cuenta demo y llena la sesión', () async {
-      viewModel.useDemoAccount(DemoSeed.emisor.email, DemoSeed.password);
+      viewModel.useDemoAccount(DemoFixture.emisor.email, DemoFixture.password);
 
       final result = await viewModel.submit();
 
       expect(result.isOk, isTrue);
-      expect(session.user, DemoSeed.emisor);
+      expect(session.user, DemoFixture.emisor);
       expect(viewModel.isBusy, isFalse);
       expect(viewModel.hasError, isFalse);
     });
 
     test('muestra error con credenciales incorrectas', () async {
-      viewModel.setEmail(DemoSeed.emisor.email);
+      viewModel.setEmail(DemoFixture.emisor.email);
       viewModel.setPassword('contraseña-incorrecta');
 
       final result = await viewModel.submit();
@@ -68,7 +69,7 @@ void main() {
     });
 
     test('cerrar sesión limpia el usuario actual', () async {
-      viewModel.useDemoAccount(DemoSeed.contador.email, DemoSeed.password);
+      viewModel.useDemoAccount(DemoFixture.contador.email, DemoFixture.password);
       await viewModel.submit();
       expect(session.isAuthenticated, isTrue);
 

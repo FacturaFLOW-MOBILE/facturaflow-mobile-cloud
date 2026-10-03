@@ -1,11 +1,11 @@
-import 'package:factura_flow_mobile/data/demo/demo_seed.dart';
+import 'demo_fixture.dart';
 import 'package:factura_flow_mobile/data/models/app_user.dart';
 import 'package:factura_flow_mobile/data/models/invoice.dart';
 
 /// Usuarios reutilizados por las pruebas.
-const AppUser emisor = DemoSeed.emisor;
-const AppUser contador = DemoSeed.contador;
-const AppUser administrador = DemoSeed.administrador;
+const AppUser emisor = DemoFixture.emisor;
+const AppUser contador = DemoFixture.contador;
+const AppUser administrador = DemoFixture.administrador;
 
 /// Fecha fija para que las pruebas no dependan del reloj real.
 final DateTime fechaFija = DateTime(2026, 8, 20, 9);
