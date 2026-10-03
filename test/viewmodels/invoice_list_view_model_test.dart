@@ -64,16 +64,18 @@ void main() {
     viewModel.dispose();
   });
 
-  test('el ámbito "revisión" excluye las facturas propias del revisor',
-      () async {
-    final viewModel = viewModelFor(administrador);
-    await viewModel.load();
-    viewModel.setScope(InvoiceScope.revision);
+  test(
+    'el ámbito "revisión" excluye las facturas propias del revisor',
+    () async {
+      final viewModel = viewModelFor(administrador);
+      await viewModel.load();
+      viewModel.setScope(InvoiceScope.revision);
 
-    expect(viewModel.visible, hasLength(1));
-    expect(viewModel.visible.single.number, 'FE-B');
-    viewModel.dispose();
-  });
+      expect(viewModel.visible, hasLength(1));
+      expect(viewModel.visible.single.number, 'FE-B');
+      viewModel.dispose();
+    },
+  );
 
   test('el filtro por estado reduce la lista', () async {
     final viewModel = viewModelFor(emisor);
@@ -95,6 +97,28 @@ void main() {
     expect(viewModel.visible.single.number, 'FE-D');
     viewModel.dispose();
   });
+
+  test(
+    'busca descripciones y montos sin perder filtros de estado y rol',
+    () async {
+      final viewModel = viewModelFor(emisor);
+      await viewModel.load();
+      for (final query in [
+        ' SERVICIO DE PRUEBA ',
+        '1190',
+        '1.190,00',
+        '1190.00',
+      ]) {
+        viewModel.setQuery(query);
+        expect(viewModel.visible, hasLength(3), reason: query);
+      }
+      viewModel.setStatusFilter(InvoiceStatus.aprobada);
+      expect(viewModel.visible.single.number, 'FE-C');
+      viewModel.setQuery('sin coincidencias');
+      expect(viewModel.visible, isEmpty);
+      viewModel.dispose();
+    },
+  );
 
   test('quitar filtros restaura la lista completa', () async {
     final viewModel = viewModelFor(emisor);

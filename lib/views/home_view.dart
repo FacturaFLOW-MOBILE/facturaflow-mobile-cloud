@@ -235,7 +235,7 @@ class _Header extends StatelessWidget {
           const SizedBox(height: 12),
           TextField(
             decoration: const InputDecoration(
-              hintText: 'Buscar por número, proveedor o NIT',
+              hintText: 'Buscar por número, proveedor, NIT, ítem o monto',
               prefixIcon: Icon(Icons.search),
               isDense: true,
             ),
