@@ -1,48 +1,31 @@
-/// Utilidades de formato sin dependencias externas (evita `intl`).
+import 'package:intl/intl.dart';
+
+/// Utilidades de formato con locale colombiano explícito.
 class Formatters {
   const Formatters._();
 
-  /// Formatea un monto guardado en centavos: `123456789` -> `$ 1.234.567,89`.
+  /// Formatea centavos con separadores colombianos y dos decimales.
   static String money(int cents, {String symbol = r'$'}) {
-    final negative = cents < 0;
-    final absolute = cents.abs();
-    final units = absolute ~/ 100;
-    final decimals = (absolute % 100).toString().padLeft(2, '0');
-    final buffer = StringBuffer();
-    if (negative) buffer.write('-');
-    buffer
-      ..write(symbol)
-      ..write(' ')
-      ..write(_thousands(units))
-      ..write(',')
-      ..write(decimals);
-    return buffer.toString();
+    final format = NumberFormat.currency(
+      locale: 'es_CO',
+      symbol: symbol,
+      decimalDigits: 2,
+    );
+    // Conserva el contrato visual: signo, símbolo, espacio y valor.
+    final amount = format
+        .format(cents.abs() / 100)
+        .replaceFirst(symbol, '')
+        .trim();
+    return '${cents < 0 ? '-' : ''}$symbol $amount';
   }
 
-  /// `1234567` -> `1.234.567`.
-  static String _thousands(int value) {
-    final digits = value.toString();
-    final buffer = StringBuffer();
-    for (var i = 0; i < digits.length; i++) {
-      if (i > 0 && (digits.length - i) % 3 == 0) buffer.write('.');
-      buffer.write(digits[i]);
-    }
-    return buffer.toString();
-  }
+  // Patrones numéricos fijos: en_US viene inicializado en intl y no necesita
+  // descargar símbolos locales; el orden día/mes/año lo fija el patrón.
+  static String date(DateTime value) =>
+      DateFormat('dd/MM/yyyy', 'en_US').format(value);
 
-  /// `2026-08-26` en formato local corto: `26/08/2026`.
-  static String date(DateTime value) {
-    final d = value.day.toString().padLeft(2, '0');
-    final m = value.month.toString().padLeft(2, '0');
-    return '$d/$m/${value.year}';
-  }
-
-  /// Fecha y hora corta: `26/08/2026 14:05`.
-  static String dateTime(DateTime value) {
-    final h = value.hour.toString().padLeft(2, '0');
-    final min = value.minute.toString().padLeft(2, '0');
-    return '${date(value)} $h:$min';
-  }
+  static String dateTime(DateTime value) =>
+      DateFormat('dd/MM/yyyy HH:mm', 'en_US').format(value);
 
   /// Convierte texto escrito por el usuario (`1.250,50` o `1250.5`) a centavos.
   ///
