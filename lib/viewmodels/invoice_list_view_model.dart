@@ -1,4 +1,5 @@
 import '../core/result.dart';
+import '../core/formatters.dart';
 import '../data/models/app_user.dart';
 import '../data/models/invoice.dart';
 import '../data/repositories/invoice_repository.dart';
@@ -44,10 +45,10 @@ class InvoiceListViewModel extends BaseViewModel {
 
   /// Ámbitos disponibles según el rol.
   List<InvoiceScope> get availableScopes => [
-        if (_user.role.canCreateInvoices) InvoiceScope.propias,
-        if (_user.role.canReviewInvoices) InvoiceScope.revision,
-        if (_user.role.canSeeAllInvoices) InvoiceScope.todas,
-      ];
+    if (_user.role.canCreateInvoices) InvoiceScope.propias,
+    if (_user.role.canReviewInvoices) InvoiceScope.revision,
+    if (_user.role.canSeeAllInvoices) InvoiceScope.todas,
+  ];
 
   /// Todas las facturas traídas del repositorio, sin filtrar.
   List<Invoice> get all => List.unmodifiable(_all);
@@ -55,14 +56,24 @@ class InvoiceListViewModel extends BaseViewModel {
   /// Facturas que cumplen ámbito + estado + búsqueda.
   List<Invoice> get visible {
     final query = _query.trim().toLowerCase();
-    return _all.where((invoice) {
-      if (!_matchesScope(invoice)) return false;
-      if (_statusFilter != null && invoice.status != _statusFilter) return false;
-      if (query.isEmpty) return true;
-      return invoice.number.toLowerCase().contains(query) ||
-          invoice.supplierName.toLowerCase().contains(query) ||
-          invoice.supplierTaxId.toLowerCase().contains(query);
-    }).toList(growable: false);
+    return _all
+        .where((invoice) {
+          if (!_matchesScope(invoice)) return false;
+          if (_statusFilter != null && invoice.status != _statusFilter) {
+            return false;
+          }
+          if (query.isEmpty) return true;
+          return invoice.number.toLowerCase().contains(query) ||
+              invoice.supplierName.toLowerCase().contains(query) ||
+              invoice.supplierTaxId.toLowerCase().contains(query) ||
+              invoice.items.any(
+                (item) => item.description.toLowerCase().contains(query),
+              ) ||
+              Formatters.money(invoice.totalCents).contains(query) ||
+              Formatters.centsToInput(invoice.totalCents).contains(query) ||
+              (invoice.totalCents / 100).toStringAsFixed(2).contains(query);
+        })
+        .toList(growable: false);
   }
 
   bool get isEmpty => visible.isEmpty;
@@ -79,14 +90,15 @@ class InvoiceListViewModel extends BaseViewModel {
 
   /// Total aprobado del ámbito actual, en centavos.
   int get approvedTotalCents => _all
-      .where((invoice) =>
-          _matchesScope(invoice) && invoice.status == InvoiceStatus.aprobada)
+      .where(
+        (invoice) =>
+            _matchesScope(invoice) && invoice.status == InvoiceStatus.aprobada,
+      )
       .fold(0, (total, invoice) => total + invoice.totalCents);
 
   /// Facturas pendientes de revisión (badge del contador).
-  int get pendingReviewCount => _all
-      .where((invoice) => invoice.status == InvoiceStatus.enviada)
-      .length;
+  int get pendingReviewCount =>
+      _all.where((invoice) => invoice.status == InvoiceStatus.enviada).length;
 
   Future<void> load() async {
     final result = await runGuarded(() => _repository.fetchAll(_user));
@@ -135,9 +147,9 @@ class InvoiceListViewModel extends BaseViewModel {
   }
 
   bool _matchesScope(Invoice invoice) => switch (_scope) {
-        InvoiceScope.propias => invoice.isOwnedBy(_user),
-        InvoiceScope.revision =>
-          invoice.status == InvoiceStatus.enviada && !invoice.isOwnedBy(_user),
-        InvoiceScope.todas => true,
-      };
+    InvoiceScope.propias => invoice.isOwnedBy(_user),
+    InvoiceScope.revision =>
+      invoice.status == InvoiceStatus.enviada && !invoice.isOwnedBy(_user),
+    InvoiceScope.todas => true,
+  };
 }
