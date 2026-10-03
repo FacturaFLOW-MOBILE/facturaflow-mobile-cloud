@@ -81,6 +81,34 @@ void main() {
     });
   });
 
+  group('Motivo de rechazo', () {
+    test('exige un motivo no vacío', () {
+      expect(
+        Invoice.rejectionReasonError(null),
+        'Debes indicar el motivo del rechazo.',
+      );
+      expect(
+        Invoice.rejectionReasonError('   '),
+        'Debes indicar el motivo del rechazo.',
+      );
+    });
+
+    test('rechaza un motivo demasiado corto para justificar nada', () {
+      // El caso reportado: un único carácter pasaba la validación anterior.
+      expect(Invoice.rejectionReasonError('.'), isNotNull);
+      expect(Invoice.rejectionReasonError('corto'), isNotNull);
+      expect(Invoice.rejectionReasonError('.'), contains('10'));
+    });
+
+    test('acepta una explicación real e ignora los espacios sobrantes', () {
+      expect(Invoice.rejectionReasonError('Falta el soporte'), isNull);
+      expect(
+        Invoice.rejectionReasonError('   Falta el soporte   '),
+        isNull,
+      );
+    });
+  });
+
   group('Permisos por rol', () {
     test('el emisor dueño puede editar su borrador', () {
       final invoice = buildInvoice(owner: emisor);

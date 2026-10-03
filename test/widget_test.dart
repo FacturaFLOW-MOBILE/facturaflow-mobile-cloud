@@ -116,7 +116,16 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Rechazar'));
     await tester.pumpAndSettle();
     expect(
-      find.text('Explica el motivo (mínimo 5 caracteres).'),
+      find.text('Debes indicar el motivo del rechazo.'),
+      findsOneWidget,
+    );
+
+    // Con un motivo simbólico tampoco se cierra: hay que justificar el rechazo.
+    await tester.enterText(find.byType(TextField).last, '.');
+    await tester.tap(find.widgetWithText(FilledButton, 'Rechazar'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Explica el motivo con al menos 10 caracteres.'),
       findsOneWidget,
     );
 
