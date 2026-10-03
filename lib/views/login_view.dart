@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../app/app_config.dart';
@@ -47,12 +48,10 @@ class _LoginFormState extends State<_LoginForm> {
     final result = await viewModel.submit();
     if (!mounted) return;
     if (result case Ok<AppUser>()) {
-      // Si el login se abrió como ruta con nombre, se reemplaza por la raíz;
+      // Si el login se abrió como su propia ruta, se reemplaza por la raíz;
       // cuando lo muestra RootView, este ya reacciona al cambio de sesión.
-      final routeName = ModalRoute.of(context)?.settings.name;
-      if (routeName == AppRoutes.login) {
-        Navigator.of(context)
-            .pushNamedAndRemoveUntil(AppRoutes.root, (route) => false);
+      if (GoRouterState.of(context).matchedLocation == AppRoute.login.path) {
+        context.goToRoot();
       }
     }
   }

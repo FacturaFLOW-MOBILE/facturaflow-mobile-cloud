@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../app/routes.dart';
@@ -50,7 +51,7 @@ class _InvoiceDetail extends StatelessWidget {
     required String successMessage,
     bool popOnSuccess = false,
   }) async {
-    final navigator = Navigator.of(context);
+    final router = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
@@ -75,7 +76,7 @@ class _InvoiceDetail extends StatelessWidget {
     switch (result) {
       case Ok<dynamic>():
         messenger.showSnackBar(SnackBar(content: Text(successMessage)));
-        if (popOnSuccess) navigator.pop(true);
+        if (popOnSuccess) router.pop(true);
       case Err<dynamic>(:final failure):
         messenger.showSnackBar(SnackBar(content: Text(failure.message)));
     }
@@ -105,11 +106,8 @@ class _InvoiceDetail extends StatelessWidget {
 
   Future<void> _edit(BuildContext context, Invoice invoice) async {
     final viewModel = context.read<InvoiceDetailViewModel>();
-    final updated = await Navigator.of(context).pushNamed<dynamic>(
-      AppRoutes.invoiceForm,
-      arguments: InvoiceFormArgs(existing: invoice),
-    );
-    if (updated is Invoice) viewModel.applyUpdated(updated);
+    final updated = await context.pushInvoiceForm(existing: invoice);
+    if (updated != null) viewModel.applyUpdated(updated);
   }
 
   @override
@@ -121,7 +119,7 @@ class _InvoiceDetail extends StatelessWidget {
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
-        Navigator.of(context).pop(viewModel.hasChanges);
+        context.pop(viewModel.hasChanges);
       },
       child: Scaffold(
         appBar: AppBar(
