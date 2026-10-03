@@ -155,6 +155,20 @@ void main() {
       expect(result.valueOrNull?.status, InvoiceStatus.borrador);
     });
 
+    test('al reabrir, el borrador ya no arrastra el motivo del rechazo',
+        () async {
+      final rechazada =
+          await repository.reject('inv-b', contador, reason: 'Datos erróneos');
+      expect(rechazada.valueOrNull?.rejectionReason, 'Datos erróneos');
+
+      final reabierta = await repository.reopen('inv-b', emisor);
+      expect(reabierta.valueOrNull?.rejectionReason, isNull);
+
+      // También queda limpia la copia almacenada en el repositorio.
+      final releida = await repository.getById('inv-b');
+      expect(releida.valueOrNull?.rejectionReason, isNull);
+    });
+
     test('solo se eliminan borradores', () async {
       final enviada = await repository.delete('inv-b', emisor);
       expect(enviada.failureOrNull, isA<ValidationFailure>());

@@ -165,11 +165,15 @@ class Invoice {
       );
 
   /// Devuelve una factura rechazada a borrador para corregirla.
+  ///
+  /// El motivo del rechazo se descarta: el borrador resultante ya no arrastra
+  /// la justificación de la revisión anterior.
   Invoice reopened(AppUser actor, DateTime at) => _transition(
         actor: actor,
         at: at,
         status: InvoiceStatus.borrador,
         description: 'Reabierta para corrección',
+        clearRejection: true,
       );
 
   Invoice _transition({
