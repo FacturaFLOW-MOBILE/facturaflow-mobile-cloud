@@ -1,8 +1,10 @@
 // Pruebas de widget del flujo principal: login, bandeja por rol y aprobación.
 import 'package:factura_flow_mobile/app/app.dart';
 import 'package:factura_flow_mobile/app/design_tokens.dart';
-import 'package:factura_flow_mobile/app/dependencies.dart';
-import 'package:factura_flow_mobile/data/demo/demo_seed.dart';
+
+import 'helpers/demo_dependencies.dart';
+import 'helpers/demo_fixture.dart';
+
 import 'package:factura_flow_mobile/viewmodels/invoice_list_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,9 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   /// Inicia la app con repositorios en memoria y sin latencia.
   Future<void> pumpApp(WidgetTester tester) async {
-    await tester.pumpWidget(
-      FacturaFlowApp(dependencies: Dependencies.forTests()),
-    );
+    final dependencies = await tester.runAsync(loadDemoDependencies);
+    await tester.pumpWidget(FacturaFlowApp(dependencies: dependencies!));
     await tester.pumpAndSettle();
   }
 
@@ -23,8 +24,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('arranca en el login mostrando las cuentas demo',
-      (tester) async {
+  testWidgets('arranca en el login mostrando las cuentas demo', (tester) async {
     await pumpApp(tester);
 
     expect(find.text('FacturaFlow'), findsOneWidget);
@@ -33,8 +33,9 @@ void main() {
     expect(find.textContaining('Carlos Ruiz'), findsOneWidget);
   });
 
-  testWidgets('el login rechaza un correo con formato inválido',
-      (tester) async {
+  testWidgets('el login rechaza un correo con formato inválido', (
+    tester,
+  ) async {
     await pumpApp(tester);
 
     await tester.enterText(find.byType(TextFormField).first, 'no-es-correo');
@@ -47,7 +48,7 @@ void main() {
 
   testWidgets('el emisor entra y ve sus facturas', (tester) async {
     await pumpApp(tester);
-    await signInAs(tester, DemoSeed.emisor.fullName);
+    await signInAs(tester, DemoFixture.emisor.fullName);
 
     // Sus cuatro facturas del set de demostración, incluida la rechazada
     // (FE-1004 queda bajo el pliegue: hay que desplazar la lista).
@@ -67,10 +68,11 @@ void main() {
     expect(find.widgetWithText(FloatingActionButton, 'Nueva'), findsOneWidget);
   });
 
-  testWidgets('el contador entra a la cola de revisión y sin botón de crear',
-      (tester) async {
+  testWidgets('el contador entra a la cola de revisión y sin botón de crear', (
+    tester,
+  ) async {
     await pumpApp(tester);
-    await signInAs(tester, DemoSeed.contador.fullName);
+    await signInAs(tester, DemoFixture.contador.fullName);
 
     expect(find.text('Por revisar'), findsOneWidget);
     expect(find.widgetWithText(FloatingActionButton, 'Nueva'), findsNothing);
@@ -79,10 +81,11 @@ void main() {
     expect(find.text('FE-1005'), findsOneWidget);
   });
 
-  testWidgets('el contador aprueba una factura y desaparece de su cola',
-      (tester) async {
+  testWidgets('el contador aprueba una factura y desaparece de su cola', (
+    tester,
+  ) async {
     await pumpApp(tester);
-    await signInAs(tester, DemoSeed.contador.fullName);
+    await signInAs(tester, DemoFixture.contador.fullName);
 
     await tester.tap(find.text('FE-1002'));
     await tester.pumpAndSettle();
@@ -105,7 +108,7 @@ void main() {
 
   testWidgets('el rechazo exige un motivo antes de confirmar', (tester) async {
     await pumpApp(tester);
-    await signInAs(tester, DemoSeed.contador.fullName);
+    await signInAs(tester, DemoFixture.contador.fullName);
 
     await tester.tap(find.text('FE-1002'));
     await tester.pumpAndSettle();
@@ -116,10 +119,7 @@ void main() {
     // Sin motivo: el diálogo no se cierra y muestra el error.
     await tester.tap(find.widgetWithText(FilledButton, 'Rechazar'));
     await tester.pumpAndSettle();
-    expect(
-      find.text('Debes indicar el motivo del rechazo.'),
-      findsOneWidget,
-    );
+    expect(find.text('Debes indicar el motivo del rechazo.'), findsOneWidget);
 
     // Con un motivo simbólico tampoco se cierra: hay que justificar el rechazo.
     await tester.enterText(find.byType(TextField).last, '.');
@@ -137,10 +137,11 @@ void main() {
     expect(find.text('Factura rechazada'), findsOneWidget);
   });
 
-  testWidgets('el formulario toma su espaciado de los design tokens',
-      (tester) async {
+  testWidgets('el formulario toma su espaciado de los design tokens', (
+    tester,
+  ) async {
     await pumpApp(tester);
-    await signInAs(tester, DemoSeed.emisor.fullName);
+    await signInAs(tester, DemoFixture.emisor.fullName);
 
     await tester.tap(find.widgetWithText(FloatingActionButton, 'Nueva'));
     await tester.pumpAndSettle();
@@ -153,7 +154,7 @@ void main() {
 
   testWidgets('cerrar sesión devuelve al login', (tester) async {
     await pumpApp(tester);
-    await signInAs(tester, DemoSeed.emisor.fullName);
+    await signInAs(tester, DemoFixture.emisor.fullName);
 
     await tester.tap(find.byType(CircleAvatar));
     await tester.pumpAndSettle();
