@@ -177,6 +177,31 @@ void main() {
       expect(invoice.history.last.comment, 'Falta el soporte');
     });
 
+    test('reabrir una factura rechazada descarta el motivo del rechazo', () {
+      final rechazada = buildInvoice(status: InvoiceStatus.enviada)
+          .rejected(contador, momento, reason: 'Falta el soporte');
+      expect(rechazada.rejectionReason, 'Falta el soporte');
+
+      final reabierta = rechazada.reopened(emisor, momento);
+
+      expect(reabierta.status, InvoiceStatus.borrador);
+      expect(reabierta.rejectionReason, isNull);
+      expect(reabierta.history.last.description, 'Reabierta para corrección');
+    });
+
+    test('reabrir conserva el motivo en el historial de auditoría', () {
+      final reabierta = buildInvoice(status: InvoiceStatus.enviada)
+          .rejected(contador, momento, reason: 'Falta el soporte')
+          .reopened(emisor, momento.add(const Duration(minutes: 5)));
+
+      // El borrador ya no muestra el motivo, pero el rechazo sigue registrado.
+      expect(reabierta.rejectionReason, isNull);
+      expect(
+        reabierta.history.any((event) => event.comment == 'Falta el soporte'),
+        isTrue,
+      );
+    });
+
     test('reenviar tras un rechazo limpia el motivo anterior', () {
       final rechazada = buildInvoice(status: InvoiceStatus.enviada)
           .rejected(contador, momento, reason: 'Falta el soporte');
