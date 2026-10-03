@@ -1,5 +1,6 @@
 // Pruebas de widget del flujo principal: login, bandeja por rol y aprobación.
 import 'package:factura_flow_mobile/app/app.dart';
+import 'package:factura_flow_mobile/app/design_tokens.dart';
 import 'package:factura_flow_mobile/app/dependencies.dart';
 import 'package:factura_flow_mobile/data/demo/demo_seed.dart';
 import 'package:factura_flow_mobile/viewmodels/invoice_list_view_model.dart';
@@ -125,6 +126,20 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Factura rechazada'), findsOneWidget);
+  });
+
+  testWidgets('el formulario toma su espaciado de los design tokens',
+      (tester) async {
+    await pumpApp(tester);
+    await signInAs(tester, DemoSeed.emisor.fullName);
+
+    await tester.tap(find.widgetWithText(FloatingActionButton, 'Nueva'));
+    await tester.pumpAndSettle();
+    expect(find.text('Nueva factura'), findsOneWidget);
+
+    // El relleno sale del token, no de un EdgeInsets escrito a mano.
+    final lista = tester.widget<ListView>(find.byType(ListView));
+    expect(lista.padding, AppInsets.formPage);
   });
 
   testWidgets('cerrar sesión devuelve al login', (tester) async {
