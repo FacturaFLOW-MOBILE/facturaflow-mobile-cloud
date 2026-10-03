@@ -90,6 +90,22 @@ void main() {
     viewModel.dispose();
   });
 
+  test('el rechazo con un motivo de un solo carácter no llega al repositorio',
+      () async {
+    final viewModel = viewModelFor(contador, 'enviada');
+    await viewModel.load();
+
+    final result = await viewModel.reject('.');
+
+    expect(result.failureOrNull, isA<ValidationFailure>());
+    expect(viewModel.errorMessage, contains('10'));
+    // La factura sigue en revisión: no se registró ningún rechazo.
+    expect(viewModel.invoice?.status, InvoiceStatus.enviada);
+    expect(viewModel.invoice?.rejectionReason, isNull);
+    expect(viewModel.hasChanges, isFalse);
+    viewModel.dispose();
+  });
+
   test('el rechazo con motivo actualiza estado y razón', () async {
     final viewModel = viewModelFor(contador, 'enviada');
     await viewModel.load();

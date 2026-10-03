@@ -104,6 +104,29 @@ class Invoice {
 
   // --- Validación ----------------------------------------------------------
 
+  /// Longitud mínima exigida al motivo de un rechazo.
+  ///
+  /// Un motivo de un solo carácter («.») satisface el "campo obligatorio" pero
+  /// no justifica nada ante el emisor, que es justo lo que el rechazo debe
+  /// comunicar. La regla vive aquí para que la apliquen por igual la vista, el
+  /// ViewModel y el repositorio.
+  static const int minRejectionReasonLength = 10;
+
+  /// Valida el motivo de un rechazo.
+  ///
+  /// Devuelve `null` si es aceptable, o el mensaje a mostrar al revisor.
+  static String? rejectionReasonError(String? reason) {
+    final text = (reason ?? '').trim();
+    if (text.isEmpty) {
+      return 'Debes indicar el motivo del rechazo.';
+    }
+    if (text.length < minRejectionReasonLength) {
+      return 'Explica el motivo con al menos '
+          '$minRejectionReasonLength caracteres.';
+    }
+    return null;
+  }
+
   /// Errores de negocio que impiden enviar la factura a revisión.
   List<String> validationErrors() {
     final errors = <String>[];
