@@ -14,7 +14,7 @@ class AppConfig {
 
   /// Configuración leída de los `--dart-define` del build.
   factory AppConfig.fromEnvironment() {
-    const demo = bool.fromEnvironment('DEMO_MODE', defaultValue: true);
+    const demo = bool.fromEnvironment('DEMO_MODE', defaultValue: false);
     const baseUrl = String.fromEnvironment('API_BASE_URL');
     return const AppConfig(demoMode: demo, apiBaseUrl: baseUrl);
   }
