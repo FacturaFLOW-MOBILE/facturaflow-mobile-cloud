@@ -10,10 +10,14 @@ import '../helpers/fixtures.dart';
 void main() {
   late DemoInvoiceRepository repository;
 
-  InvoiceDraft draft({String number = 'FE-7001'}) => InvoiceDraft(
+  InvoiceDraft draft({
+    String number = 'FE-7001',
+    String supplierTaxId = '901222333-4',
+  }) =>
+      InvoiceDraft(
         number: number,
         supplierName: 'Proveedor Nuevo',
-        supplierTaxId: '901222333-4',
+        supplierTaxId: supplierTaxId,
         issueDate: fechaFija,
         items: const [
           InvoiceItem(
@@ -72,9 +76,89 @@ void main() {
       expect(result.failureOrNull, isA<PermissionFailure>());
     });
 
-    test('rechaza números de factura duplicados', () async {
-      final result = await repository.create(draft(number: 'FE-A'), emisor);
+    test('dos proveedores distintos pueden usar el mismo número', () async {
+      // 'FE-A' ya existe, pero con el NIT 900000000-1. El consecutivo lo
+      // lleva cada proveedor, así que esta factura es legítima.
+      final result = await repository.create(
+        draft(number: 'FE-A', supplierTaxId: '901222333-4'),
+        emisor,
+      );
+
+      expect(result.isOk, isTrue);
+      expect(result.valueOrNull?.number, 'FE-A');
+      expect(repository.snapshot, hasLength(4));
+    });
+
+    test('rechaza el mismo número para el mismo proveedor', () async {
+      final result = await repository.create(
+        draft(number: 'FE-A', supplierTaxId: '900000000-1'),
+        emisor,
+      );
+
       expect(result.failureOrNull, isA<ValidationFailure>());
+      expect(result.failureOrNull!.message, contains('900000000-1'));
+      expect(repository.snapshot, hasLength(3));
+    });
+
+    test('al comparar el número ignora mayúsculas y espacios', () async {
+      final result = await repository.create(
+        draft(number: '  fe-a  ', supplierTaxId: '900000000-1'),
+        emisor,
+      );
+
+      expect(result.failureOrNull, isA<ValidationFailure>());
+    });
+  });
+
+  group('update', () {
+    test('una factura no se considera duplicada de sí misma', () async {
+      final result = await repository.update(
+        'inv-a',
+        draft(number: 'FE-A', supplierTaxId: '900000000-1'),
+        emisor,
+      );
+
+      expect(result.isOk, isTrue);
+      expect(result.valueOrNull?.number, 'FE-A');
+    });
+
+    test('al editar, el número no puede chocar con otra del mismo proveedor',
+        () async {
+      final mismoProveedor = DemoInvoiceRepository(
+        config: AppConfig.test(),
+        clock: testClock,
+        initialInvoices: [
+          buildInvoice(
+            id: 'inv-1',
+            number: 'FE-1',
+            supplierTaxId: '900000000-1',
+          ),
+          buildInvoice(
+            id: 'inv-2',
+            number: 'FE-2',
+            supplierTaxId: '900000000-1',
+          ),
+        ],
+      );
+
+      final result = await mismoProveedor.update(
+        'inv-2',
+        draft(number: 'FE-1', supplierTaxId: '900000000-1'),
+        emisor,
+      );
+
+      expect(result.failureOrNull, isA<ValidationFailure>());
+    });
+
+    test('al editar, sí puede tomar el número de otro proveedor', () async {
+      final result = await repository.update(
+        'inv-a',
+        draft(number: 'FE-B', supplierTaxId: '901222333-4'),
+        emisor,
+      );
+
+      expect(result.isOk, isTrue);
+      expect(result.valueOrNull?.number, 'FE-B');
     });
   });
 
