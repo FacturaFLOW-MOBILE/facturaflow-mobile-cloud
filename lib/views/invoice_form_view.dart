@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../app/design_tokens.dart';
 import '../core/formatters.dart';
 import '../core/result.dart';
 import '../data/models/invoice.dart';
@@ -137,7 +138,7 @@ class _InvoiceFormState extends State<_InvoiceForm> {
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+            padding: AppInsets.formPage,
             children: [
               TextFormField(
                 controller: _numberController,
@@ -150,7 +151,7 @@ class _InvoiceFormState extends State<_InvoiceForm> {
                 validator: viewModel.validateNumber,
                 onChanged: viewModel.setNumber,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               TextFormField(
                 controller: _supplierController,
                 decoration: const InputDecoration(
@@ -161,7 +162,7 @@ class _InvoiceFormState extends State<_InvoiceForm> {
                 validator: viewModel.validateSupplierName,
                 onChanged: viewModel.setSupplierName,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               TextFormField(
                 controller: _taxIdController,
                 decoration: const InputDecoration(
@@ -173,10 +174,10 @@ class _InvoiceFormState extends State<_InvoiceForm> {
                 validator: viewModel.validateSupplierTaxId,
                 onChanged: viewModel.setSupplierTaxId,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               InkWell(
                 onTap: () => _pickIssueDate(viewModel),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppRadius.md),
                 child: InputDecorator(
                   decoration: const InputDecoration(
                     labelText: 'Fecha de emisión',
@@ -185,7 +186,7 @@ class _InvoiceFormState extends State<_InvoiceForm> {
                   child: Text(Formatters.date(viewModel.issueDate)),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xl),
               Row(
                 children: [
                   Text('Ítems', style: theme.textTheme.titleMedium),
@@ -200,9 +201,9 @@ class _InvoiceFormState extends State<_InvoiceForm> {
               if (viewModel.items.isEmpty)
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(16),
+                  padding: AppInsets.card,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     border: Border.all(color: theme.colorScheme.outlineVariant),
                   ),
                   child: Text(
@@ -216,7 +217,7 @@ class _InvoiceFormState extends State<_InvoiceForm> {
                 ...List.generate(viewModel.items.length, (index) {
                   final item = viewModel.items[index];
                   return Card(
-                    margin: const EdgeInsets.only(bottom: 8),
+                    margin: AppInsets.listCardGap,
                     child: ListTile(
                       title: Text(item.description),
                       subtitle: Text(
@@ -245,13 +246,13 @@ class _InvoiceFormState extends State<_InvoiceForm> {
                     ),
                   );
                 }),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               _TotalsCard(
                 subtotalCents: viewModel.subtotalCents,
                 taxCents: viewModel.taxCents,
                 totalCents: viewModel.totalCents,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               TextFormField(
                 controller: _notesController,
                 decoration: const InputDecoration(
@@ -262,14 +263,14 @@ class _InvoiceFormState extends State<_InvoiceForm> {
                 onChanged: viewModel.setNotes,
               ),
               if (viewModel.hasError) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
                 Text(
                   viewModel.errorMessage!,
                   style: theme.textTheme.bodySmall
                       ?.copyWith(color: theme.colorScheme.error),
                 ),
               ],
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xl),
               FilledButton.icon(
                 onPressed: viewModel.isBusy
                     ? null
@@ -277,7 +278,7 @@ class _InvoiceFormState extends State<_InvoiceForm> {
                 icon: const Icon(Icons.send),
                 label: const Text('Guardar y enviar a revisión'),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
               OutlinedButton.icon(
                 onPressed: viewModel.isBusy
                     ? null
@@ -308,7 +309,7 @@ class _TotalsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     Widget row(String label, String value, {bool bold = false}) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: AppInsets.totalsRow,
           child: Row(
             children: [
               Text(
@@ -331,7 +332,7 @@ class _TotalsCard extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppInsets.card,
         child: Column(
           children: [
             row('Subtotal', Formatters.money(subtotalCents)),
@@ -402,12 +403,7 @@ class _ItemEditorSheetState extends State<_ItemEditorSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-      ),
+      padding: AppInsets.sheet(MediaQuery.of(context).viewInsets.bottom),
       child: Form(
         key: _formKey,
         child: Column(
@@ -418,7 +414,7 @@ class _ItemEditorSheetState extends State<_ItemEditorSheet> {
               widget.initial == null ? 'Nuevo ítem' : 'Editar ítem',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             TextFormField(
               controller: _descriptionController,
               decoration: const InputDecoration(labelText: 'Descripción'),
@@ -427,7 +423,7 @@ class _ItemEditorSheetState extends State<_ItemEditorSheet> {
                   ? 'Describe el ítem.'
                   : null,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
                 Expanded(
@@ -445,7 +441,7 @@ class _ItemEditorSheetState extends State<_ItemEditorSheet> {
                     },
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   flex: 2,
                   child: TextFormField(
@@ -467,7 +463,7 @@ class _ItemEditorSheetState extends State<_ItemEditorSheet> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
             DropdownButtonFormField<double>(
               initialValue: _taxRate,
               decoration: const InputDecoration(labelText: 'IVA'),
@@ -482,9 +478,9 @@ class _ItemEditorSheetState extends State<_ItemEditorSheet> {
               onChanged: (value) =>
                   setState(() => _taxRate = value ?? _taxRate),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
             FilledButton(onPressed: _save, child: const Text('Guardar ítem')),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.xs),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Cancelar'),
