@@ -499,8 +499,9 @@ class _RejectDialogState extends State<_RejectDialog> {
 
   void _confirm() {
     final reason = _controller.text.trim();
-    if (reason.length < 5) {
-      setState(() => _error = 'Explica el motivo (mínimo 5 caracteres).');
+    final problem = Invoice.rejectionReasonError(reason);
+    if (problem != null) {
+      setState(() => _error = problem);
       return;
     }
     Navigator.of(context).pop(reason);
