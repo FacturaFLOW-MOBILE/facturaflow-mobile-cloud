@@ -82,10 +82,8 @@ class DemoInvoiceRepository implements InvoiceRepository {
         ),
       ],
     );
-    if (_invoices.any((existing) => existing.number == invoice.number)) {
-      return Err(
-        ValidationFailure('Ya existe una factura con el número ${invoice.number}.'),
-      );
+    if (_isDuplicate(invoice.number, invoice.supplierTaxId)) {
+      return Err(_duplicateFailure(invoice.number, invoice.supplierTaxId));
     }
     _invoices.add(invoice);
     return Ok(invoice);
@@ -110,12 +108,13 @@ class DemoInvoiceRepository implements InvoiceRepository {
         ),
       );
     }
-    final duplicated = _invoices.any(
-      (other) => other.id != id && other.number == draft.number.trim(),
-    );
-    if (duplicated) {
+    if (_isDuplicate(
+      draft.number,
+      draft.supplierTaxId,
+      exceptId: id,
+    )) {
       return Err(
-        ValidationFailure('Ya existe una factura con el número ${draft.number.trim()}.'),
+        _duplicateFailure(draft.number, draft.supplierTaxId),
       );
     }
     final updated = current.copyWith(
@@ -253,6 +252,34 @@ class DemoInvoiceRepository implements InvoiceRepository {
     _invoices[index] = updated;
     return Ok(updated);
   }
+
+  /// ¿Ya existe otra factura con el mismo número **para el mismo proveedor**?
+  ///
+  /// El número de factura es un consecutivo que lleva cada proveedor, así que
+  /// dos proveedores distintos pueden emitir legítimamente una `FE-1001`. Lo
+  /// que no puede repetirse es la pareja (número, NIT).
+  ///
+  /// [exceptId] excluye la propia factura al editarla.
+  bool _isDuplicate(String number, String supplierTaxId, {String? exceptId}) {
+    final targetNumber = _normalizeNumber(number);
+    final targetTaxId = supplierTaxId.trim();
+    return _invoices.any(
+      (other) =>
+          other.id != exceptId &&
+          _normalizeNumber(other.number) == targetNumber &&
+          other.supplierTaxId.trim() == targetTaxId,
+    );
+  }
+
+  Failure _duplicateFailure(String number, String supplierTaxId) =>
+      ValidationFailure(
+        'El proveedor con NIT ${supplierTaxId.trim()} ya tiene una factura '
+        'con el número ${number.trim()}.',
+      );
+
+  /// El formulario escribe el número en mayúsculas; `fe-1001` y `FE-1001` son
+  /// el mismo consecutivo.
+  static String _normalizeNumber(String number) => number.trim().toUpperCase();
 
   int _indexOf(String id) => _invoices.indexWhere((invoice) => invoice.id == id);
 
