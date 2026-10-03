@@ -267,6 +267,25 @@ void main() {
       expect(peticiones, isEmpty);
     });
 
+    test('el rechazo aplica la misma regla de longitud que el resto de la app',
+        () async {
+      final api = clientFor((_) => okInvoice());
+
+      final result = await RemoteInvoiceRepository(api).reject(
+        'inv-1',
+        contador,
+        reason: '.',
+      );
+
+      // La regla vive en Invoice, no duplicada aquí.
+      expect(result.failureOrNull, isA<ValidationFailure>());
+      expect(
+        result.failureOrNull!.message,
+        Invoice.rejectionReasonError('.'),
+      );
+      expect(peticiones, isEmpty);
+    });
+
     test('delete usa DELETE y acepta una respuesta vacía', () async {
       final api = clientFor((_) => http.Response('', 204));
 

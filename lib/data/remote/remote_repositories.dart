@@ -161,12 +161,12 @@ class RemoteInvoiceRepository implements InvoiceRepository {
     AppUser actor, {
     required String reason,
   }) async {
-    // Se valida antes de salir a la red: un rechazo sin motivo no es una
+    // Misma regla que el resto de la app (ver [Invoice.rejectionReasonError]),
+    // aplicada antes de salir a la red: un rechazo sin justificar no es una
     // petición que valga la pena hacer.
-    if (reason.trim().isEmpty) {
-      return const Err(
-        ValidationFailure('Debes indicar el motivo del rechazo.'),
-      );
+    final problem = Invoice.rejectionReasonError(reason);
+    if (problem != null) {
+      return Err(ValidationFailure(problem));
     }
     return _api.post(
       '/invoices/${_segment(id)}/reject',
