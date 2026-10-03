@@ -32,8 +32,42 @@ void main() {
       expect(Formatters.centsFromInput(''), isNull);
     });
 
+    test('acepta separadores de Colombia y Estados Unidos', () {
+      for (final input in [
+        '1.234.567,89',
+        '1,234,567.89',
+        '1234567.89',
+        '1234567,89',
+      ]) {
+        expect(Formatters.centsFromInput(input), 123456789, reason: input);
+      }
+      expect(Formatters.centsFromInput('1,234'), 123400);
+      expect(Formatters.centsFromInput('1.234'), 123400);
+      expect(Formatters.centsFromInput('-1,250.50'), -125050);
+      expect(Formatters.centsFromInput('0.01'), 1);
+    });
+
+    test('rechaza grupos mal formados y valores no finitos', () {
+      for (final input in [
+        '1,23,4.50',
+        '1.23.4,50',
+        '1,234.567',
+        'NaN',
+        'Infinity',
+        '1e3',
+        '12,',
+        '1..2',
+        '9223372036854775807',
+      ]) {
+        expect(Formatters.centsFromInput(input), isNull, reason: input);
+      }
+    });
+
     test('es la operación inversa de centsToInput', () {
-      expect(Formatters.centsFromInput(Formatters.centsToInput(987654)), 987654);
+      expect(
+        Formatters.centsFromInput(Formatters.centsToInput(987654)),
+        987654,
+      );
     });
   });
 

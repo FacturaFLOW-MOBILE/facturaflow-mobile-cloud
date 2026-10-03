@@ -49,18 +49,50 @@ class Formatters {
   /// Devuelve `null` si el texto no es un número válido.
   static int? centsFromInput(String raw) {
     var text = raw.trim().replaceAll(RegExp(r'[\s$]'), '');
-    if (text.isEmpty) return null;
-    final hasComma = text.contains(',');
-    final hasDot = text.contains('.');
-    if (hasComma && hasDot) {
-      // Formato es-CO: el punto es separador de miles.
-      text = text.replaceAll('.', '').replaceAll(',', '.');
-    } else if (hasComma) {
-      text = text.replaceAll(',', '.');
+    if (!RegExp(r'^[+-]?\d[\d.,]*$').hasMatch(text)) return null;
+    final negative = text.startsWith('-');
+    text = text.replaceFirst(RegExp(r'^[+-]'), '');
+    final comma = text.lastIndexOf(',');
+    final dot = text.lastIndexOf('.');
+    String whole;
+    String fraction = '';
+    if (comma >= 0 && dot >= 0) {
+      // El último separador es decimal; el otro debe agrupar miles.
+      final decimal = comma > dot ? ',' : '.';
+      final grouping = decimal == ',' ? '.' : ',';
+      final parts = text.split(decimal);
+      if (parts.length != 2 || !RegExp(r'^\d{1,2}$').hasMatch(parts[1])) {
+        return null;
+      }
+      final grouped = RegExp(
+        '^\\d{1,3}(?:${RegExp.escape(grouping)}\\d{3})+\$',
+      );
+      if (!grouped.hasMatch(parts[0])) return null;
+      whole = parts[0].replaceAll(grouping, '');
+      fraction = parts[1];
+    } else if (comma >= 0 || dot >= 0) {
+      final separator = comma >= 0 ? ',' : '.';
+      final parts = text.split(separator);
+      if (parts.length == 2 && RegExp(r'^\d{1,2}$').hasMatch(parts[1])) {
+        whole = parts[0];
+        fraction = parts[1];
+      } else {
+        // Tres dígitos después del separador se interpretan como miles.
+        final grouped = RegExp(
+          '^\\d{1,3}(?:${RegExp.escape(separator)}\\d{3})+\$',
+        );
+        if (!grouped.hasMatch(text)) return null;
+        whole = parts.join();
+      }
+    } else {
+      whole = text;
     }
-    final value = double.tryParse(text);
-    if (value == null || value.isNaN || value.isInfinite) return null;
-    return (value * 100).round();
+    final units = int.tryParse(whole);
+    if (units == null || units > 90071992547409) return null;
+    final cents = units * 100 + int.parse(fraction.padRight(2, '0'));
+    // Mantener precisión entera también en Flutter web.
+    if (cents > 9007199254740991) return null;
+    return negative ? -cents : cents;
   }
 
   /// Representación editable de un monto en centavos: `1234550` -> `12345,50`.
