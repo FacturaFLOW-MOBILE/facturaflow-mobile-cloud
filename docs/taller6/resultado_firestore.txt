@@ -1,0 +1,51 @@
+======================================================================
+PRUEBA 1 — Conexión a Cloud Firestore
+======================================================================
+  PASA  Cliente conectado al proyecto — facturaflow-mcc-2026
+
+======================================================================
+PRUEBA 2 — Colecciones existentes en la nube
+======================================================================
+  PASA  Las 4 colecciones raíz existen — invoices, sessions, suppliers, users
+
+======================================================================
+PRUEBA 7 — Consulta de documentos
+======================================================================
+  PASA  Usuarios cargados — 3 documentos
+  PASA  Proveedores cargados — 3 documentos
+  PASA  Facturas cargadas — 3 documentos
+
+======================================================================
+PRUEBA 5 — Relaciones entre documentos
+======================================================================
+  PASA  Factura recuperada por id compuesto — 900123456-7_FE-1001
+  PASA  Referencia a proveedor se resuelve — Papelería La 45
+  PASA  Referencia a usuario se resuelve — Ana Torres
+  PASA  Subcolección de ítems — 2 líneas
+  PASA  Subcolección de eventos — 1 eventos
+
+======================================================================
+PRUEBA 7b — Cálculo de totales
+======================================================================
+  PASA  Subtotal coincide con el almacenado — 71200000 centavos
+  PASA  Total = subtotal + IVA — 84728000 centavos
+
+======================================================================
+PRUEBA 14 — Reglas de negocio de los Issues del Corte II
+======================================================================
+  PASA  Issue #41 — FE-1001 existe en dos proveedores distintos — 900123456-7, 901555222-1
+  PASA  Issue #41 — los ids (NIT_numero) son únicos — 3 facturas, 3 ids distintos
+  PASA  Issue #40 — hay una factura rechazada
+  PASA  Issue #40 — el motivo supera los 10 caracteres — 44 caracteres
+  PASA  Issue #42 — motivo presente solo en facturas rechazadas
+  PASA  Issue #42 — el historial conserva el comentario del rechazo — 3 eventos registrados
+
+======================================================================
+PRUEBA 7c — Consulta con filtro (índice automático)
+======================================================================
+  PASA  Filtro por estado 'enviada' — 1 resultado(s)
+  PASA  Filtro por emisor 'u-ana' — 3 resultado(s)
+
+======================================================================
+RESULTADO: 20 aserciones PASA, 0 FALLA
+======================================================================
