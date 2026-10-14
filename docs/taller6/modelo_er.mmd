@@ -1,0 +1,74 @@
+%% FacturaFlow Mobile Cloud — Diagrama Entidad-Relación
+%% Actividad Evaluable 06 — Notación Crow's Foot (Mermaid erDiagram)
+%%
+%% PK = llave primaria, FK = llave foránea, UK = única
+%% Cardinalidad:  ||--o{  = uno a muchos (obligatorio en el lado uno)
+%%                ||--|{  = uno a muchos (al menos uno en el lado muchos)
+
+erDiagram
+    APP_USER ||--o{ INVOICE       : "crea"
+    APP_USER ||--o{ INVOICE_EVENT : "ejecuta"
+    APP_USER ||--o{ AUTH_SESSION  : "abre"
+    SUPPLIER ||--o{ INVOICE       : "emite"
+    INVOICE  ||--|{ INVOICE_ITEM  : "detalla"
+    INVOICE  ||--|{ INVOICE_EVENT : "registra"
+
+    APP_USER {
+        uuid        id             PK "gen_random_uuid()"
+        varchar_120 full_name      "NOT NULL, >= 3 caracteres"
+        varchar_254 email          UK "NOT NULL, formato validado"
+        varchar_255 password_hash  "NOT NULL, nunca en claro"
+        user_role   role           "ENUM: emisor|contador|administrador"
+        boolean     is_active      "NOT NULL, DEFAULT TRUE"
+        timestamptz created_at     "NOT NULL, DEFAULT now()"
+        timestamptz updated_at     "NOT NULL, trigger"
+    }
+
+    SUPPLIER {
+        uuid        id         PK "gen_random_uuid()"
+        varchar_20  tax_id     UK "NIT, formato [0-9.-]{5,20}"
+        varchar_160 name       "NOT NULL"
+        timestamptz created_at "NOT NULL, DEFAULT now()"
+    }
+
+    INVOICE {
+        uuid           id               PK "gen_random_uuid()"
+        varchar_40     number           UK "unico junto a supplier_id (Issue 41)"
+        uuid           supplier_id      FK "-> SUPPLIER.id, ON DELETE RESTRICT"
+        date           issue_date       "NOT NULL"
+        invoice_status status           "ENUM: borrador|enviada|aprobada|rechazada"
+        uuid           created_by_id    FK "-> APP_USER.id, ON DELETE RESTRICT"
+        text           notes            "NOT NULL, DEFAULT ''"
+        text           rejection_reason "NULL salvo rechazada, >= 10 car. (Issues 40 y 42)"
+        timestamptz    created_at       "NOT NULL, DEFAULT now()"
+        timestamptz    updated_at       "NOT NULL, trigger"
+    }
+
+    INVOICE_ITEM {
+        uuid         id               PK "gen_random_uuid()"
+        uuid         invoice_id       FK "-> INVOICE.id, ON DELETE CASCADE"
+        smallint     line_number      UK "unico junto a invoice_id"
+        varchar_255  description      "NOT NULL"
+        integer      quantity         "NOT NULL, > 0"
+        bigint       unit_price_cents "NOT NULL, > 0, en centavos"
+        numeric_5_4  tax_rate         "NOT NULL, DEFAULT 0.19, entre 0 y 1"
+    }
+
+    INVOICE_EVENT {
+        uuid           id          PK "gen_random_uuid()"
+        uuid           invoice_id  FK "-> INVOICE.id, ON DELETE CASCADE"
+        uuid           actor_id    FK "-> APP_USER.id, ON DELETE RESTRICT"
+        invoice_status status      "estado resultante del evento"
+        varchar_255    description "NOT NULL"
+        text           comment     "NULL, obligatorio en rechazos"
+        timestamptz    occurred_at "NOT NULL, DEFAULT now()"
+    }
+
+    AUTH_SESSION {
+        uuid         id         PK "gen_random_uuid()"
+        uuid         user_id    FK "-> APP_USER.id, ON DELETE CASCADE"
+        varchar_255  token_hash UK "hash del token, nunca en claro"
+        timestamptz  issued_at  "NOT NULL, DEFAULT now()"
+        timestamptz  expires_at "NOT NULL, > issued_at"
+        timestamptz  revoked_at "NULL mientras la sesion siga activa"
+    }
