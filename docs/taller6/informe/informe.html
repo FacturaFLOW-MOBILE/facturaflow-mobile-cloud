@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Actividad Evaluable 06 — FacturaFlow Mobile Cloud</title>
+<style>
+  @page { size: Letter; margin: 2.5cm 2.5cm 2cm 3cm; }
+
+  html { font-size: 11pt; }
+  body {
+    font-family: "Times New Roman", Times, serif;
+    line-height: 1.5;
+    color: #000;
+    margin: 0;
+    text-align: justify;
+  }
+
+  h1, h2, h3, h4 { font-family: "Times New Roman", Times, serif; page-break-after: avoid; }
+  h1 { font-size: 14pt; font-weight: bold; text-align: center; text-transform: uppercase; margin: 0 0 .8em; }
+  h2 { font-size: 12pt; font-weight: bold; margin: 1.6em 0 .5em; }
+  h3 { font-size: 11pt; font-weight: bold; margin: 1.2em 0 .4em; }
+  h4 { font-size: 11pt; font-style: italic; font-weight: normal; margin: 1em 0 .3em; }
+  p { margin: 0 0 .7em; text-indent: 1.27cm; }
+  p.noindent, li p { text-indent: 0; }
+
+  .portada { text-align: center; page-break-after: always; padding-top: 2cm; }
+  .portada .inst { font-size: 13pt; font-weight: bold; text-transform: uppercase; line-height: 1.6; }
+  .portada .tit { font-size: 15pt; font-weight: bold; margin: 3cm 0 .4cm; text-transform: uppercase; }
+  .portada .sub { font-size: 12pt; margin-bottom: 3cm; }
+  .portada .datos { font-size: 12pt; line-height: 2; }
+  .marcador { background: #FFF2CC; border: 1px dashed #B8860B; padding: 0 .3em; font-style: italic; }
+
+  .toc { page-break-after: always; }
+  .toc ol { list-style: none; padding-left: 0; counter-reset: s; }
+  .toc li { counter-increment: s; margin: .25em 0; }
+  .toc li::before { content: counter(s) ". "; font-weight: bold; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 9pt; margin: .5em 0 1em; page-break-inside: auto; }
+  thead { display: table-header-group; }
+  tr { page-break-inside: avoid; }
+  th, td { border: 1px solid #333; padding: 4px 6px; text-align: left; vertical-align: top; }
+  th { background: #D9D9D9; font-weight: bold; }
+  td.c, th.c { text-align: center; }
+
+  .caption { font-size: 9pt; text-align: center; margin: .2em 0 1.2em; text-indent: 0; }
+  .caption b { font-weight: bold; }
+
+  figure { margin: 1em 0; text-align: center; page-break-inside: avoid; }
+  figure img { max-width: 100%; border: 1px solid #999; }
+
+  pre {
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 8.5pt;
+    background: #F4F4F4;
+    border: 1px solid #CCC;
+    padding: 8px 10px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.35;
+    page-break-inside: avoid;
+  }
+  code { font-family: "Consolas", "Courier New", monospace; font-size: 9.5pt; }
+
+  blockquote { margin: .6em 0 .6em 1.27cm; font-size: 10pt; }
+  ul, ol { margin: .3em 0 .9em; padding-left: 1.6cm; }
+  li { margin: .2em 0; }
+
+  .ref { padding-left: 1.27cm; text-indent: -1.27cm; margin-bottom: .6em; }
+  .pb { page-break-before: always; }
+  .nota { font-size: 9.5pt; background: #F0F6FB; border-left: 3px solid #1B5E9B; padding: 6px 10px; margin: .8em 0; text-indent: 0; }
+</style>
+</head>
+<body>
+
+<!-- ============================ PORTADA ============================ -->
+<section class="portada">
+  <div class="inst">
+    Fundación Universitaria Los Libertadores<br>
+    Facultad de Ingeniería y Ciencias Básicas<br>
+    Programa de Ingeniería de Sistemas
+  </div>
+
+  <div class="tit">Diseño Arquitectónico y Modelado<br>de Soluciones Móviles</div>
+  <div class="sub">
+    Actividad Evaluable 06<br>
+    Modelado e Implementación de la Base de Datos<br><br>
+    Proyecto: <b>FacturaFlow Mobile Cloud</b>
+  </div>
+
+  <div class="datos">
+    <b>Asignatura:</b> Mobile Cloud Computing — IS0249-210<br>
+    <b>Carácter:</b> Grupo<br><br>
+    <b>Integrantes:</b><br>
+    Jhon Alexander Vargas (@jhon9036)<br>
+    David Santiago Piedrahita Cabeza (@santkd16)<br><br>
+    <b>Código estudiante:</b> <span class="marcador">[COMPLETAR]</span><br>
+    <b>Docente:</b> Endi Romero<br>
+    <b>Fecha de entrega:</b> <span class="marcador">[COMPLETAR]</span><br><br>
+    Bogotá D.C., Colombia — 2026
+  </div>
+</section>
+
+<!-- ============================ TABLA DE CONTENIDO ============================ -->
+<section class="toc">
+  <h1>Tabla de contenido</h1>
+  <ol>
+    <li>Introducción</li>
+    <li>Objetivo general</li>
+    <li>Objetivos específicos</li>
+    <li>Descripción del proyecto</li>
+    <li>Arquitectura tecnológica</li>
+    <li>Análisis de requerimientos de información</li>
+    <li>Modelado conceptual</li>
+    <li>Modelado lógico</li>
+    <li>Modelado físico</li>
+    <li>Diagrama entidad-relación</li>
+    <li>Explicación de las relaciones</li>
+    <li>Diccionario de datos</li>
+    <li>Selección de la plataforma cloud</li>
+    <li>Implementación de la base de datos</li>
+    <li>Configuración de seguridad</li>
+    <li>Integración con Django</li>
+    <li>Pruebas y validaciones</li>
+    <li>Evidencias de implementación</li>
+    <li>Resultados</li>
+    <li>Conclusiones</li>
+    <li>Referencias bibliográficas</li>
+    <li>Anexos</li>
+  </ol>
+</section>
+
+<!-- ============================ 1 ============================ -->
+<h2>1. Introducción</h2>
+
+<p>El desarrollo de aplicaciones móviles conectadas a servicios en la nube impone una exigencia que no existe en el software de escritorio tradicional: el modelo de datos debe soportar clientes intermitentes, con conectividad variable, que escriben desde dispositivos distintos sobre la misma información. En ese contexto, la base de datos deja de ser un detalle de implementación y pasa a ser el contrato que garantiza que la información siga siendo coherente sin importar desde dónde se modifique.</p>
+
+<p>El presente documento recoge el diseño y la implementación del modelo de datos de <b>FacturaFlow Mobile Cloud</b>, una solución para la gestión y aprobación de facturas con roles diferenciados. El trabajo abarca las cuatro fases que exige la actividad: el modelado de la base de datos, el diagrama entidad-relación, el diccionario de datos y la implementación en una plataforma en la nube.</p>
+
+<p>Una decisión metodológica atraviesa todo el documento y conviene declararla desde el inicio: el modelo no se diseñó en abstracto, sino que se derivó del dominio real ya implementado en la aplicación móvil. Las reglas de negocio que el modelo expresa como restricciones de integridad no son hipótesis, sino reglas que el equipo corrigió durante el Corte II y que están documentadas como incidencias resueltas en el repositorio del proyecto.</p>
+
+<!-- ============================ 2 ============================ -->
+<h2>2. Objetivo general</h2>
+
+<p>Diseñar e implementar el modelo de datos de la solución móvil FacturaFlow Mobile Cloud, asegurando la integridad, la escalabilidad y la disponibilidad de la información mediante el uso de servicios de base de datos administrados en Google Cloud Platform.</p>
+
+<!-- ============================ 3 ============================ -->
+<h2>3. Objetivos específicos</h2>
+
+<ol>
+  <li>Identificar las entidades, los atributos y las relaciones que soportan el funcionamiento real de la aplicación, a partir del dominio implementado y no de supuestos.</li>
+  <li>Construir los modelos conceptual, lógico y físico, explicitando las diferencias entre los tres niveles de abstracción.</li>
+  <li>Representar el modelo mediante un diagrama entidad-relación en notación <i>Crow's Foot</i>, con cardinalidades y restricciones explícitas.</li>
+  <li>Documentar un diccionario de datos exhaustivo que detalle cada tabla, campo, tipo de dato, restricción y relación.</li>
+  <li>Implementar el esquema en PostgreSQL 17 sobre Google Cloud SQL, con conexiones cifradas y copias de seguridad automáticas.</li>
+  <li>Verificar mediante pruebas ejecutables que la implementación respeta las reglas de negocio y la integridad referencial del diseño.</li>
+  <li>Garantizar la coherencia entre el diagrama, el diccionario, los modelos del backend y el esquema efectivamente implementado.</li>
+</ol>
+
+<!-- ============================ 4 ============================ -->
+<h2>4. Descripción del proyecto</h2>
+
+<p>FacturaFlow Mobile Cloud es una aplicación móvil para la gestión, revisión y aprobación de facturas de proveedores. Su propósito es trasladar a un dispositivo móvil un flujo que tradicionalmente ocurre sobre documentos físicos y correo electrónico, dejando trazabilidad de cada decisión.</p>
+
+<h3>4.1 Roles del sistema</h3>
+
+<p class="noindent">La aplicación distingue tres roles, cada uno con capacidades diferentes:</p>
+
+<table>
+  <thead><tr><th style="width:22%">Rol</th><th>Capacidades verificadas en el código</th></tr></thead>
+  <tbody>
+    <tr><td><b>Emisor</b></td><td>Crea, edita y envía a revisión sus propias facturas. Solo visualiza las que él mismo registró.</td></tr>
+    <tr><td><b>Contador</b></td><td>Revisa la cola de facturas enviadas; aprueba o rechaza. No puede revisar facturas creadas por él mismo.</td></tr>
+    <tr><td><b>Administrador</b></td><td>Reúne ambas capacidades y visualiza la totalidad de las facturas de la organización.</td></tr>
+  </tbody>
+</table>
+<p class="caption"><b>Tabla 1.</b> Roles del sistema y sus capacidades.</p>
+
+<h3>4.2 Ciclo de vida de una factura</h3>
+
+<p class="noindent">El flujo de aprobación define cuatro estados y las transiciones permitidas entre ellos:</p>
+
+<pre>borrador ──enviar──▶ enviada ──aprobar──▶ aprobada
+                        │
+                        └──rechazar──▶ rechazada ──corregir──▶ borrador</pre>
+
+<p>Las facturas en estado <code>aprobada</code> son terminales. Una factura <code>rechazada</code> puede reabrirse para corrección, lo que la devuelve a <code>borrador</code>. Cada transición queda registrada en un historial de auditoría que no se modifica ni se borra.</p>
+
+<h3>4.3 Reglas de negocio derivadas de incidencias resueltas</h3>
+
+<p>Tres reglas del modelo provienen de defectos detectados y corregidos durante el Corte II. Resulta pertinente mencionarlas porque explican decisiones de diseño que de otro modo parecerían arbitrarias:</p>
+
+<table>
+  <thead><tr><th class="c" style="width:10%">Incidencia</th><th style="width:38%">Defecto corregido</th><th>Regla que impone al modelo</th></tr></thead>
+  <tbody>
+    <tr>
+      <td class="c">#40</td>
+      <td>Se aceptaba un motivo de rechazo de un solo carácter, de modo que era posible rechazar sin justificar.</td>
+      <td>El motivo de rechazo exige un mínimo de 10 caracteres.</td>
+    </tr>
+    <tr>
+      <td class="c">#41</td>
+      <td>El número de factura se validaba como único global, impidiendo que dos proveedores usaran el mismo consecutivo.</td>
+      <td>La unicidad es la pareja (número, proveedor), no el número aislado.</td>
+    </tr>
+    <tr>
+      <td class="c">#42</td>
+      <td>Al reabrir una factura rechazada, el borrador conservaba el motivo del rechazo anterior.</td>
+      <td>El motivo solo existe mientras el estado es <code>rechazada</code>.</td>
+    </tr>
+  </tbody>
+</table>
+<p class="caption"><b>Tabla 2.</b> Incidencias del Corte II y las reglas que imponen al modelo de datos.</p>
+
+<!-- ============================ 5 ============================ -->
+<h2 class="pb">5. Arquitectura tecnológica</h2>
+
+<p>La solución se organiza en cuatro capas, cada una con una responsabilidad delimitada:</p>
+
+<pre>┌──────────────────────────────────────────────┐
+│  Flutter 3.47 · Dart 3.13 · patrón MVVM      │  Cliente móvil
+│  Views → ViewModels → Repositories           │
+└───────────────────┬──────────────────────────┘
+                    │  HTTPS / JSON · token Bearer
+┌───────────────────▼──────────────────────────┐
+│  Django 5.2 + Django REST Framework 3.16     │  API REST
+│  Reglas de negocio · permisos · auditoría    │
+└───────────────────┬──────────────────────────┘
+                    │  psycopg 3 · TLS obligatorio
+┌───────────────────▼──────────────────────────┐
+│  PostgreSQL 17 sobre Google Cloud SQL        │  Persistencia
+│  Integridad referencial · CHECK · índices    │
+└──────────────────────────────────────────────┘</pre>
+
+<h3>5.1 Flutter como cliente</h3>
+
+<p>La aplicación móvil implementa el patrón MVVM. Las vistas no conocen la implementación concreta del origen de datos: dependen de interfaces de repositorio que se resuelven por inyección de dependencias. Esta decisión permite que la aplicación funcione en modo demostración —con datos en memoria— o contra el servidor real, sin modificar una sola línea de la interfaz de usuario.</p>
+
+<h3>5.2 Django REST Framework como API</h3>
+
+<p>El backend concentra las reglas de negocio, la autenticación por token, los permisos por rol y la persistencia. Centralizar la validación en el servidor evita que un cliente desactualizado pueda introducir datos que violen las reglas del dominio.</p>
+
+<h3>5.3 PostgreSQL como motor de persistencia</h3>
+
+<p>La elección de PostgreSQL responde a las características del dominio. La información de facturación es intrínsecamente relacional: una factura pertenece a un proveedor, la registra un usuario, contiene líneas de detalle y acumula eventos de auditoría. Estas relaciones deben mantenerse íntegras bajo cualquier circunstancia, y un motor relacional las garantiza mediante llaves foráneas y transacciones ACID, sin delegar esa responsabilidad al código de aplicación.</p>
+
+<!-- ============================ 6 ============================ -->
+<h2>6. Análisis de requerimientos de información</h2>
+
+<p>Antes de modelar se identificó qué información debe persistir el sistema y bajo qué condiciones. El análisis partió de las funcionalidades efectivamente implementadas en la aplicación móvil.</p>
+
+<table>
+  <thead><tr><th style="width:26%">Requerimiento</th><th style="width:40%">Necesidad de persistencia</th><th>Implicación para el modelo</th></tr></thead>
+  <tbody>
+    <tr><td>Autenticación por rol</td><td>Usuarios con credenciales y un rol que determina sus permisos.</td><td>Entidad de usuario con rol restringido a un conjunto cerrado de valores.</td></tr>
+    <tr><td>Registro de facturas</td><td>Documento con número, proveedor, fecha, líneas de detalle y notas.</td><td>Entidad de factura con relación a proveedor y a sus líneas.</td></tr>
+    <tr><td>Identificación del proveedor</td><td>Razón social y NIT, reutilizados entre facturas.</td><td>Entidad propia de proveedor; evita repetir los datos en cada factura.</td></tr>
+    <tr><td>Cálculo de importes</td><td>Cantidad, precio unitario y tasa de IVA por línea.</td><td>Importes en centavos como enteros, para eliminar el error de redondeo.</td></tr>
+    <tr><td>Flujo de aprobación</td><td>Estado actual de cada factura y transiciones permitidas.</td><td>Atributo de estado con dominio cerrado y restricciones de coherencia.</td></tr>
+    <tr><td>Auditoría</td><td>Quién hizo qué, cuándo y con qué comentario.</td><td>Entidad de eventos de solo inserción, nunca modificada.</td></tr>
+    <tr><td>Sesiones móviles</td><td>Token emitido al iniciar sesión, con caducidad.</td><td>Entidad de sesión que almacena el <i>hash</i> del token, nunca el token.</td></tr>
+  </tbody>
+</table>
+<p class="caption"><b>Tabla 3.</b> Requerimientos de información y su implicación sobre el modelo de datos.</p>
+
+<h3>6.1 Atributos de calidad considerados</h3>
+
+<ul>
+  <li><b>Integridad.</b> Las reglas del dominio se expresan como restricciones de la base de datos, no únicamente como validaciones de la aplicación. Una regla que vive solo en el cliente se puede eludir; una que vive en el esquema, no.</li>
+  <li><b>Escalabilidad.</b> Se definieron índices sobre las columnas que participan en los filtros frecuentes —estado, autor, proveedor y fecha de actualización— de modo que el rendimiento no se degrade al crecer el volumen de facturas.</li>
+  <li><b>Disponibilidad.</b> El servicio administrado realiza copias de seguridad automáticas diarias y permite recuperación a un punto en el tiempo.</li>
+  <li><b>Seguridad.</b> Las contraseñas y los tokens se almacenan como <i>hash</i>. Las conexiones exigen TLS. El acceso se concede con privilegio mínimo.</li>
+  <li><b>Consistencia.</b> Las transiciones de estado se ejecutan dentro de transacciones, de modo que una factura nunca queda en un estado intermedio.</li>
+</ul>
+
+<!-- ============================ 7 ============================ -->
+<h2 class="pb">7. Modelado conceptual</h2>
+
+<p>El modelo conceptual describe <i>qué</i> información existe y cómo se relaciona, con independencia de cualquier motor de base de datos. Responde a la pregunta del negocio, no a la de la implementación.</p>
+
+<h3>7.1 Entidades identificadas</h3>
+
+<table>
+  <thead><tr><th style="width:20%">Entidad</th><th>Propósito en el dominio</th></tr></thead>
+  <tbody>
+    <tr><td><b>Usuario</b></td><td>Persona que accede al sistema. Su rol determina qué acciones del flujo puede ejecutar.</td></tr>
+    <tr><td><b>Proveedor</b></td><td>Organización que emite las facturas, identificada de forma única por su NIT.</td></tr>
+    <tr><td><b>Factura</b></td><td>Documento de cobro con un estado dentro del flujo de aprobación.</td></tr>
+    <tr><td><b>Línea de factura</b></td><td>Concepto facturado, con cantidad, precio unitario e impuesto.</td></tr>
+    <tr><td><b>Evento de factura</b></td><td>Registro inmutable de una transición del flujo de aprobación.</td></tr>
+    <tr><td><b>Sesión</b></td><td>Autenticación activa de un usuario desde un dispositivo móvil.</td></tr>
+  </tbody>
+</table>
+<p class="caption"><b>Tabla 4.</b> Entidades del modelo conceptual.</p>
+
+<h3>7.2 Justificación de la entidad Proveedor</h3>
+
+<p>En la implementación inicial, el nombre y el NIT del proveedor eran atributos de la factura y se repetían en cada registro. El análisis de la incidencia #41 reveló que esa decisión era incorrecta: al establecerse que el número de factura es un consecutivo que lleva <i>cada proveedor</i>, el proveedor adquiere identidad propia dentro del modelo. Un atributo repetido no puede ser parte de una clave de unicidad compuesta sin introducir anomalías de actualización.</p>
+
+<p>Separar el proveedor como entidad elimina la redundancia —corrigiendo una violación de la tercera forma normal—, evita que el mismo NIT aparezca con razones sociales distintas y permite expresar la regla de unicidad de forma directa.</p>
+
+<!-- ============================ 8 ============================ -->
+<h2>8. Modelado lógico</h2>
+
+<p>El modelo lógico traduce las entidades conceptuales a estructuras tabulares, definiendo identificadores, atributos con su dominio y restricciones. Sigue siendo independiente del motor concreto, pero ya adopta el paradigma relacional.</p>
+
+<h3>8.1 Identificadores</h3>
+
+<p>Todas las entidades utilizan como clave primaria un identificador universal único (UUID) en lugar de un entero autoincremental. La elección responde a un requisito del contexto móvil: un cliente puede generar el identificador de un registro antes de tener conectividad, lo que permite trabajar sin conexión y sincronizar después sin riesgo de colisión. Un entero secuencial exigiría un viaje al servidor para asignar el identificador.</p>
+
+<h3>8.2 Dominios cerrados</h3>
+
+<p>Los atributos <i>rol</i> y <i>estado</i> admiten un conjunto finito y conocido de valores. Se modelan como tipos enumerados, de modo que el motor rechaza cualquier valor fuera del dominio sin necesidad de una tabla de catálogo adicional ni de una validación en el código.</p>
+
+<h3>8.3 Restricciones de integridad</h3>
+
+<table>
+  <thead><tr><th style="width:30%">Restricción</th><th style="width:28%">Entidad</th><th>Regla que expresa</th></tr></thead>
+  <tbody>
+    <tr><td>Unicidad compuesta</td><td>Factura</td><td>(número, proveedor) — incidencia #41.</td></tr>
+    <tr><td>Unicidad simple</td><td>Usuario, Proveedor, Sesión</td><td>Correo, NIT y <i>hash</i> de token no se repiten.</td></tr>
+    <tr><td>Longitud mínima</td><td>Factura</td><td>El motivo de rechazo exige 10 caracteres — incidencia #40.</td></tr>
+    <tr><td>Coherencia estado-motivo</td><td>Factura</td><td>El motivo existe si y solo si el estado es <code>rechazada</code> — incidencia #42.</td></tr>
+    <tr><td>Valores positivos</td><td>Línea de factura</td><td>Cantidad y precio unitario mayores que cero.</td></tr>
+    <tr><td>Rango</td><td>Línea de factura</td><td>La tasa de impuesto se mantiene entre 0 y 1.</td></tr>
+    <tr><td>Orden temporal</td><td>Sesión</td><td>La caducidad es posterior a la emisión.</td></tr>
+  </tbody>
+</table>
+<p class="caption"><b>Tabla 5.</b> Restricciones de integridad del modelo lógico.</p>
+
+<h3>8.4 Reglas de borrado</h3>
+
+<p>Las llaves foráneas declaran explícitamente qué ocurre al eliminar el registro referenciado. La elección no es uniforme, porque las entidades tienen naturalezas distintas:</p>
+
+<ul>
+  <li><b>CASCADE</b> en las líneas y los eventos respecto de la factura: carecen de sentido fuera de ella, de modo que se eliminan con la factura.</li>
+  <li><b>RESTRICT</b> en el proveedor y el usuario respecto de la factura: impide borrar un proveedor con facturas registradas o un usuario que creó documentos, preservando la trazabilidad contable.</li>
+  <li><b>CASCADE</b> en las sesiones respecto del usuario: al eliminar un usuario, sus sesiones dejan de tener objeto.</li>
+</ul>
+
+<!-- ============================ 9 ============================ -->
+<h2 class="pb">9. Modelado físico</h2>
+
+<p>El modelo físico concreta el modelo lógico en PostgreSQL 17, eligiendo tipos de datos reales, índices y estructuras auxiliares. Es el nivel donde las decisiones dependen del motor.</p>
+
+<h3>9.1 Diferencias entre los tres niveles</h3>
+
+<table>
+  <thead><tr><th style="width:16%">Nivel</th><th style="width:28%">Responde a</th><th style="width:28%">Ejemplo en este modelo</th><th>Independiente de</th></tr></thead>
+  <tbody>
+    <tr><td><b>Conceptual</b></td><td>¿Qué información existe?</td><td>«Una factura pertenece a un proveedor»</td><td>Motor y paradigma</td></tr>
+    <tr><td><b>Lógico</b></td><td>¿Cómo se estructura?</td><td><code>invoice.supplier_id</code> referencia a <code>supplier.id</code></td><td>Motor concreto</td></tr>
+    <tr><td><b>Físico</b></td><td>¿Cómo se almacena?</td><td><code>UUID</code> con índice B-tree, <code>ON DELETE RESTRICT</code></td><td>Nada: es específico</td></tr>
+  </tbody>
+</table>
+<p class="caption"><b>Tabla 6.</b> Diferencias entre los niveles de modelado.</p>
+
+<h3>9.2 Decisiones de tipo de dato</h3>
+
+<ul>
+  <li><b><code>BIGINT</code> para importes en centavos.</b> Los montos monetarios no se almacenan como punto flotante. Un valor como 0,1 no tiene representación exacta en binario, y la acumulación de ese error en una suma de líneas produce descuadres de centavos. Guardar el importe como un entero de centavos elimina el problema de raíz.</li>
+  <li><b><code>NUMERIC(5,4)</code> para la tasa de impuesto.</b> Precisión decimal exacta para un valor como 0,1900.</li>
+  <li><b><code>TIMESTAMPTZ</code> para todas las marcas de tiempo.</b> Almacena el instante con zona horaria, necesario cuando los clientes móviles pueden estar en husos distintos.</li>
+  <li><b><code>TEXT</code> para campos de longitud no acotada</b> —notas y motivo de rechazo—, sin penalización de rendimiento en PostgreSQL frente a <code>VARCHAR</code>.</li>
+</ul>
+
+<h3>9.3 Índices</h3>
+
+<p>Además de los índices implícitos de las claves primarias y únicas, se definieron seis índices sobre las columnas que participan en los filtros y ordenamientos habituales de la aplicación: estado de la factura, autor, proveedor, fecha de actualización descendente, línea dentro de la factura y evento por factura y fecha.</p>
+
+<h3>9.4 Vista de totales</h3>
+
+<p>Se definió la vista <code>invoice_totals</code>, que calcula subtotal, impuesto y total por factura. Centralizar el cálculo evita que la fórmula se duplique —y eventualmente diverja— entre la aplicación móvil y el backend.</p>
+
+<!-- ============================ 10 ============================ -->
+<h2 class="pb">10. Diagrama entidad-relación</h2>
+
+<p>El diagrama emplea la notación <i>Crow's Foot</i>, que representa la cardinalidad mediante la terminación de las líneas de relación. Cada entidad lista sus atributos con el tipo de dato, la marca de clave primaria (PK), foránea (FK) o única (UK), y una descripción de la restricción aplicable.</p>
+
+<figure>
+  <img src="../diagrama_er.png" alt="Diagrama entidad-relación de FacturaFlow Mobile Cloud">
+</figure>
+<p class="caption"><b>Figura 1.</b> Diagrama entidad-relación de FacturaFlow Mobile Cloud. Notación <i>Crow's Foot</i>. El código fuente editable se incluye en el Anexo A.</p>
+
+<!-- ============================ 11 ============================ -->
+<h2>11. Explicación de las relaciones</h2>
+
+<table>
+  <thead><tr><th style="width:30%">Relación</th><th class="c" style="width:12%">Cardinalidad</th><th>Lectura e implicación</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Usuario <b>crea</b> Factura</td><td class="c">1 : N</td>
+      <td>Un usuario puede registrar muchas facturas; cada factura tiene exactamente un autor. El autor no se puede eliminar mientras conserve facturas.</td>
+    </tr>
+    <tr>
+      <td>Proveedor <b>emite</b> Factura</td><td class="c">1 : N</td>
+      <td>Un proveedor emite muchas facturas; cada factura corresponde a un solo proveedor. El número de factura es único dentro del proveedor.</td>
+    </tr>
+    <tr>
+      <td>Factura <b>detalla</b> Línea</td><td class="c">1 : N</td>
+      <td>Una factura contiene al menos una línea para poder enviarse a revisión. Las líneas se eliminan con la factura.</td>
+    </tr>
+    <tr>
+      <td>Factura <b>registra</b> Evento</td><td class="c">1 : N</td>
+      <td>Toda factura tiene al menos el evento de creación. El historial crece con cada transición y nunca se modifica.</td>
+    </tr>
+    <tr>
+      <td>Usuario <b>ejecuta</b> Evento</td><td class="c">1 : N</td>
+      <td>Cada evento identifica al usuario que lo provocó, lo que permite auditar la responsabilidad de cada decisión.</td>
+    </tr>
+    <tr>
+      <td>Usuario <b>abre</b> Sesión</td><td class="c">1 : N</td>
+      <td>Un usuario puede tener sesiones simultáneas en varios dispositivos. Las sesiones se eliminan con el usuario.</td>
+    </tr>
+  </tbody>
+</table>
+<p class="caption"><b>Tabla 7.</b> Relaciones del modelo, cardinalidades e implicaciones.</p>
+
+<h3>11.1 Ausencia de relaciones muchos a muchos</h3>
+
+<p>El modelo no contiene relaciones de cardinalidad N:M, y conviene justificarlo. En el dominio analizado no se identificó ningún caso en que dos entidades deban asociarse de forma múltiple en ambos sentidos: una línea pertenece a una sola factura, un evento a una sola factura, y una factura a un solo proveedor. Introducir una tabla intermedia sin necesidad real añadiría complejidad sin aportar capacidad expresiva.</p>
+
+<!-- ============================ 12 ============================ -->
+<h2 class="pb">12. Diccionario de datos</h2>
+
+<p>El diccionario que se presenta a continuación no se redactó manualmente: se genera consultando el catálogo del sistema de la base de datos efectivamente implementada —las vistas <code>information_schema</code> y <code>pg_catalog</code>— mediante el script incluido en el Anexo C. Esta decisión metodológica garantiza que el diccionario no pueda divergir del esquema real, que es precisamente lo que exige el criterio de coherencia técnica.</p>
+
+<div class="nota">El diccionario completo, con las seis tablas y sus 42 campos, se incorpora en el <b>Anexo B</b> por extensión. A continuación se presenta la tabla <code>invoice</code> como muestra representativa del nivel de detalle documentado.</div>
+
+<!-- MARCADOR_DICCIONARIO -->
+
+<!-- ============================ 13 ============================ -->
+<h2 class="pb">13. Selección de la plataforma cloud</h2>
+
+<p>La actividad admite Firebase o Google Cloud Platform. La elección se sustentó en un análisis comparativo frente a los requisitos del proyecto.</p>
+
+<table>
+  <thead><tr><th style="width:22%">Criterio</th><th style="width:39%">Cloud SQL (PostgreSQL)</th><th>Firebase Firestore</th></tr></thead>
+  <tbody>
+    <tr><td>Paradigma</td><td>Relacional</td><td>Documental (NoSQL)</td></tr>
+    <tr><td>Integridad referencial</td><td>Nativa, mediante llaves foráneas</td><td>Inexistente; debe implementarse en el código</td></tr>
+    <tr><td>Restricciones de dominio</td><td><code>CHECK</code> y tipos enumerados</td><td>Solo mediante <i>Security Rules</i></td></tr>
+    <tr><td>Transacciones</td><td>ACID completas sobre varias tablas</td><td>Limitadas en alcance</td></tr>
+    <tr><td>Consultas con reunión</td><td><code>JOIN</code> nativo</td><td>No soportadas; exigen desnormalizar</td></tr>
+    <tr><td>Compatibilidad con Django ORM</td><td>Directa</td><td>Requiere bibliotecas de terceros</td></tr>
+    <tr><td>Continuidad con el proyecto</td><td>Conserva el motor ya adoptado</td><td>Exigiría rediseñar el modelo</td></tr>
+  </tbody>
+</table>
+<p class="caption"><b>Tabla 8.</b> Comparación entre las plataformas cloud admitidas por la actividad.</p>
+
+<h3>13.1 Justificación de la elección</h3>
+
+<p>Se seleccionó <b>Google Cloud SQL para PostgreSQL</b> por tres razones concretas. La primera es la naturaleza del dominio: la información de facturación es relacional, y un motor relacional garantiza su integridad sin delegar esa responsabilidad al código de aplicación. La segunda es la coherencia arquitectónica: el proyecto ya había adoptado PostgreSQL, y migrar a un paradigma documental supondría rediseñar el modelo sin un beneficio técnico que lo justifique. La tercera es la expresividad del modelo: las tres reglas derivadas de las incidencias del Corte II se expresan como restricciones declarativas del esquema; en Firestore tendrían que trasladarse a reglas de seguridad o a código de aplicación, donde resultan más frágiles y menos verificables.</p>
+
+<!-- ============================ 14 ============================ -->
+<h2 class="pb">14. Implementación de la base de datos</h2>
+
+<!-- MARCADOR_IMPLEMENTACION -->
+
+<!-- ============================ 15 ============================ -->
+<h2 class="pb">15. Configuración de seguridad</h2>
+
+<p>La configuración de seguridad se abordó en cuatro planos.</p>
+
+<h3>15.1 Credenciales</h3>
+
+<p>Ninguna credencial se encuentra escrita en el código fuente ni versionada en el repositorio. Los datos de conexión se leen de variables de entorno, y el repositorio incluye únicamente un archivo de ejemplo sin valores reales. El archivo con los valores efectivos está excluido del control de versiones.</p>
+
+<pre>DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": _env("DB_NAME", "facturaflow"),
+        "USER": _env("DB_USER", "postgres"),
+        "PASSWORD": _env("DB_PASSWORD"),
+        "HOST": _env("DB_HOST", "127.0.0.1"),
+        "OPTIONS": {"sslmode": _env("DB_SSLMODE", "prefer")},
+    }
+}</pre>
+<p class="caption"><b>Código 1.</b> Configuración de la conexión mediante variables de entorno.</p>
+
+<h3>15.2 Almacenamiento de secretos en la base de datos</h3>
+
+<p>Las contraseñas de los usuarios se almacenan como <i>hash</i> en el campo <code>password_hash</code>, nunca en claro. De forma análoga, la tabla de sesiones guarda el <i>hash</i> del token de autenticación y no el token mismo: si la base de datos se viera comprometida, los tokens filtrados no permitirían suplantar sesiones activas.</p>
+
+<h3>15.3 Cifrado en tránsito</h3>
+
+<p>Fuera del entorno de desarrollo, la configuración de Django activa la redirección a HTTPS, las <i>cookies</i> seguras y la cabecera HSTS. La conexión a la base de datos exige TLS.</p>
+
+<h3>15.4 Privilegio mínimo</h3>
+
+<p>El acceso para revisión académica se concede mediante un rol de solo lectura, que permite inspeccionar la estructura y consultar los datos sin capacidad de modificación o eliminación. No se comparten credenciales personales ni se otorgan roles de propietario o editor.</p>
+
+<!-- ============================ 16 ============================ -->
+<h2>16. Integración con Django</h2>
+
+<p>La integración adopta un enfoque <i>database-first</i>: el archivo <code>schema.sql</code> constituye la única fuente de verdad del esquema, y la migración inicial de Django lo aplica mediante una operación <code>RunSQL</code>. Los modelos del ORM se declaran con <code>managed = False</code>, de modo que mapean las tablas existentes sin gestionarlas.</p>
+
+<p>La razón de esta decisión es evitar la divergencia. Si Django generara el esquema a partir de los modelos, existirían dos definiciones del mismo esquema —el DDL documentado y el que Django deduce— que podrían separarse con el tiempo. Con una sola fuente, la coherencia está garantizada por construcción y no por disciplina.</p>
+
+<p>Los modelos replican además las reglas de negocio como validación de aplicación, de modo que un error se detecte antes de llegar a la base de datos y produzca un mensaje legible para el usuario. La regla de la incidencia #40, por ejemplo, existe simultáneamente en la aplicación Flutter, en el modelo de Django y como restricción <code>CHECK</code> del esquema.</p>
+
+<pre>@classmethod
+def rejection_reason_error(cls, reason: str | None) -> str | None:
+    text = (reason or "").strip()
+    if not text:
+        return "Debes indicar el motivo del rechazo."
+    if len(text) &lt; cls.MIN_REJECTION_REASON_LENGTH:
+        return f"Explica el motivo con al menos {cls.MIN_REJECTION_REASON_LENGTH} caracteres."
+    return None</pre>
+<p class="caption"><b>Código 2.</b> Validación de la incidencia #40 en el modelo de Django, equivalente a la de la aplicación Flutter.</p>
+
+<!-- ============================ 17 ============================ -->
+<h2 class="pb">17. Pruebas y validaciones</h2>
+
+<!-- MARCADOR_PRUEBAS -->
+
+<!-- ============================ 18 ============================ -->
+<h2 class="pb">18. Evidencias de implementación</h2>
+
+<!-- MARCADOR_EVIDENCIAS -->
+
+<!-- ============================ 19 ============================ -->
+<h2 class="pb">19. Resultados</h2>
+
+<!-- MARCADOR_RESULTADOS -->
+
+<!-- ============================ 20 ============================ -->
+<h2>20. Conclusiones</h2>
+
+<p><b>Sobre el modelado.</b> Derivar el modelo de datos del dominio efectivamente implementado, en lugar de diseñarlo en abstracto, produjo un esquema que corresponde con precisión a las operaciones de la aplicación. El caso de la entidad <i>Proveedor</i> ilustra el valor de este enfoque: la necesidad de separarla no surgió de aplicar mecánicamente las formas normales, sino del análisis de una incidencia real que reveló que el número de factura es un consecutivo por proveedor.</p>
+
+<p><b>Sobre la integridad.</b> Expresar las reglas de negocio como restricciones del esquema —y no solo como validaciones de la aplicación— demostró ser una decisión acertada. Las pruebas confirmaron que la base de datos rechaza por sí misma un motivo de rechazo demasiado corto o un borrador que conserve el motivo de un rechazo anterior, con independencia de qué cliente intente la operación.</p>
+
+<p><b>Sobre la coherencia técnica.</b> Generar el diccionario de datos a partir del catálogo del sistema, en lugar de redactarlo a mano, elimina por construcción la posibilidad de que la documentación y el esquema diverjan. Del mismo modo, el enfoque <i>database-first</i> en la integración con Django mantiene una única definición del esquema.</p>
+
+<p><b>Sobre la plataforma cloud.</b> La elección de un servicio administrado relacional permitió conservar la arquitectura del proyecto sin rediseñar el modelo. Los atributos de calidad que exige la actividad —integridad, escalabilidad y disponibilidad— se obtienen respectivamente de las restricciones del motor, de los índices definidos sobre las columnas de filtrado frecuente y de las copias de seguridad automáticas del servicio.</p>
+
+<p><b>Sobre el método de trabajo.</b> Validar el esquema en un entorno local equivalente antes de desplegarlo en la nube permitió detectar y corregir problemas sin incurrir en costos ni en configuraciones irreversibles. Las pruebas escritas para fallar en ausencia de cada regla ofrecen una garantía más sólida que la inspección visual del esquema.</p>
+
+<!-- ============================ 21 ============================ -->
+<h2>21. Referencias bibliográficas</h2>
+
+<p class="ref">Date, C. J. (2019). <i>Database design and relational theory: Normal forms and all that jazz</i> (2.<sup>a</sup> ed.). Apress.</p>
+
+<p class="ref">Elmasri, R., &amp; Navathe, S. B. (2016). <i>Fundamentals of database systems</i> (7.<sup>a</sup> ed.). Pearson.</p>
+
+<p class="ref">Google. (2026). <i>Cloud SQL for PostgreSQL documentation</i>. Google Cloud. https://cloud.google.com/sql/docs/postgres</p>
+
+<p class="ref">Google. (2026). <i>Cloud SQL pricing</i>. Google Cloud. https://cloud.google.com/sql/pricing</p>
+
+<p class="ref">Django Software Foundation. (2026). <i>Django documentation: Models</i> (versión 5.2). https://docs.djangoproject.com/en/5.2/topics/db/models/</p>
+
+<p class="ref">PostgreSQL Global Development Group. (2026). <i>PostgreSQL 17 documentation</i>. https://www.postgresql.org/docs/17/</p>
+
+<p class="ref">Hoberman, S. (2015). <i>Data modeling made simple</i> (2.<sup>a</sup> ed.). Technics Publications.</p>
+
+<!-- ============================ 22 ============================ -->
+<h2 class="pb">22. Anexos</h2>
+
+<!-- MARCADOR_ANEXOS -->
+
+</body>
+</html>
