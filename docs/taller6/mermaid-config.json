@@ -1,0 +1,7 @@
+{ "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#E6EFF7", "primaryTextColor": "#14202B", "primaryBorderColor": "#1B5E9B",
+    "lineColor": "#55687A", "fontFamily": "Segoe UI, Arial, sans-serif", "fontSize": "15px"
+  },
+  "er": { "diagramPadding": 24, "entityPadding": 14, "minEntityWidth": 180, "useMaxWidth": false }
+}
