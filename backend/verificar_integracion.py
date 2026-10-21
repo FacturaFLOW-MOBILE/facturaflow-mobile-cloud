@@ -4,6 +4,11 @@ Comprueba que los modelos del ORM operan contra el esquema autoritativo
 aplicado por la migración 0001 y que las reglas de negocio de los Issues
 #40, #41 y #42 se cumplen en la base.
 
+Para probar las restricciones, el script vacía las tablas y crea registros
+propios. Todo ocurre en una única transacción que se revierte al final, de
+modo que la base queda exactamente como estaba: una ejecución accidental
+contra una base con información real no borra ni deja ningún dato.
+
 Uso:  python verificar_integracion.py
 """
 
@@ -77,7 +82,15 @@ print("=" * 70)
 print("PRUEBA 6 — Inserción mediante el ORM")
 print("=" * 70)
 
-# Limpieza de una ejecución previa.
+# Salvaguarda: desde aquí todo ocurre en una transacción que se revierte
+# al final. Si el script se interrumpe, PostgreSQL también la revierte al
+# cerrarse la conexión. Los bloques atomic() internos pasan a ser puntos
+# de guardado, así que las pruebas que esperan un IntegrityError siguen
+# funcionando.
+transaction.set_autocommit(False)
+
+# Vacía las tablas dentro de la transacción para partir de un estado
+# conocido, sin importar lo que la base contenga.
 InvoiceEvent.objects.all().delete()
 InvoiceItem.objects.all().delete()
 Invoice.objects.all().delete()
@@ -231,6 +244,10 @@ with connection.cursor() as cur:
 items_despues = InvoiceItem.objects.filter(invoice_id=factura.pk).count()
 check("CASCADE elimina los ítems con la factura",
       items_antes == 2 and items_despues == 0, f"{items_antes} -> {items_despues}")
+
+# Revierte todo lo que hizo la verificación (ver la salvaguarda).
+transaction.rollback()
+transaction.set_autocommit(True)
 
 print()
 print("=" * 70)

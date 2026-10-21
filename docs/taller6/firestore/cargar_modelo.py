@@ -18,17 +18,40 @@ vida depende de la factura: en el modelo relacional la llave foránea declara
 ON DELETE CASCADE, y en Firestore la pertenencia jerárquica expresa la misma
 dependencia.
 
-Uso:  python cargar_modelo.py
+El script BORRA por completo las colecciones users, suppliers, invoices y
+sessions antes de cargar los datos de demostración. Por eso, sin el
+indicador --confirmar-borrado no se conecta ni escribe nada.
+
+Uso:
+    python cargar_modelo.py                       # solo informa; no escribe
+    python cargar_modelo.py --confirmar-borrado   # borra y recarga la demo
 """
 
 from __future__ import annotations
 
+import argparse
 import sys
 from datetime import date, datetime, timedelta, timezone
 
 from google.cloud import firestore
 
 PROJECT_ID = "facturaflow-mcc-2026"
+COLECCIONES = ("users", "suppliers", "invoices", "sessions")
+
+# ---------------------------------------------------------------------
+# Salvaguarda: una ejecución accidental no puede borrar datos reales
+# ---------------------------------------------------------------------
+parser = argparse.ArgumentParser(description="Carga el modelo de FacturaFlow en Cloud Firestore.")
+parser.add_argument(
+    "--confirmar-borrado",
+    action="store_true",
+    help=f"borra {', '.join(COLECCIONES)} en {PROJECT_ID} y carga los datos de demostración",
+)
+if not parser.parse_args().confirmar_borrado:
+    print(f"Este script BORRA {', '.join(COLECCIONES)} en el proyecto {PROJECT_ID}")
+    print("y carga en su lugar los datos de demostración. No se escribió nada.")
+    print("Para ejecutarlo:  python cargar_modelo.py --confirmar-borrado")
+    sys.exit(2)
 
 db = firestore.Client(project=PROJECT_ID)
 
@@ -58,7 +81,7 @@ def borrar_coleccion(ref, lote: int = 50) -> int:
 
 
 print("Limpiando datos de ejecuciones previas...")
-total = sum(borrar_coleccion(db.collection(c)) for c in ("users", "suppliers", "invoices", "sessions"))
+total = sum(borrar_coleccion(db.collection(c)) for c in COLECCIONES)
 print(f"  {total} documentos eliminados\n")
 
 # ---------------------------------------------------------------------
