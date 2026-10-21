@@ -1,0 +1,51 @@
+======================================================================
+PRUEBA 1 — Conexión a la base de datos
+======================================================================
+  PASA  Conexión establecida — PostgreSQL 17.11 on x86_64-pc-linux-musl
+  PASA  Base y esquema correctos — facturaflow/facturaflow
+
+======================================================================
+PRUEBA 2 — Tablas visibles para el ORM
+======================================================================
+  PASA  Las 6 tablas del modelo existen — app_user, auth_session, invoice, invoice_event, invoice_item, supplier
+
+======================================================================
+PRUEBA 6 — Inserción mediante el ORM
+======================================================================
+  PASA  Inserción de 2 usuarios, 2 proveedores, 1 factura, 2 ítems, 1 evento, 1 sesión
+
+======================================================================
+PRUEBA 5 y 7 — Relaciones y consulta con JOIN
+======================================================================
+  PASA  FK a proveedor navegable — 900123456-7
+  PASA  FK a usuario navegable
+  PASA  Relación inversa de ítems
+  PASA  Totales calculados — subtotal=71200000 iva=13528000 total=84728000
+
+======================================================================
+PRUEBA 14 — Reglas de negocio de los Issues del Corte II
+======================================================================
+  PASA  Issue #41 — dos proveedores pueden usar FE-1001
+  PASA  Issue #41 — rechaza número duplicado en el mismo proveedor
+  PASA  Issue #40 — rechaza motivo vacío
+  PASA  Issue #40 — rechaza motivo de un carácter
+  PASA  Issue #40 — acepta una justificación real
+  PASA  Issue #40 — la BD rechaza un motivo demasiado corto
+  PASA  PRUEBA 8 — actualización de estado
+  PASA  Issue #42 — la BD impide un borrador con motivo
+  PASA  Issue #42 — al reabrir, el motivo queda en NULL
+  PASA  Issue #42 — el historial conserva el motivo
+
+======================================================================
+PRUEBA 10 — Integridad referencial
+======================================================================
+  PASA  PROTECT impide borrar un proveedor con facturas — ProtectedError
+
+======================================================================
+PRUEBA 9 — Borrado en cascada
+======================================================================
+  PASA  CASCADE elimina los ítems con la factura — 2 -> 0
+
+======================================================================
+RESULTADO: 20 aserciones PASA, 0 FALLA
+======================================================================

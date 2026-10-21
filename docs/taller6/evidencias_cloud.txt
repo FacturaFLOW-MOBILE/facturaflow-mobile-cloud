@@ -1,0 +1,32 @@
+================================================================
+EVIDENCIAS DE IMPLEMENTACION EN LA NUBE — Cloud Firestore
+Proyecto: facturaflow-mcc-2026   Fecha: 2026-10-13 23:05
+================================================================
+
+--- EVIDENCIA 1: Proyecto en Google Cloud ---
+createTime: '2026-10-14T03:58:50.391Z'
+lifecycleState: ACTIVE
+name: FacturaFlow Mobile Cloud
+projectId: facturaflow-mcc-2026
+projectNumber: '480281980311'
+
+--- EVIDENCIA 2: Base de datos Firestore creada ---
+appEngineIntegrationMode: DISABLED
+concurrencyMode: PESSIMISTIC
+locationId: nam5
+name: projects/facturaflow-mcc-2026/databases/(default)
+pointInTimeRecoveryEnablement: POINT_IN_TIME_RECOVERY_DISABLED
+type: FIRESTORE_NATIVE
+
+--- EVIDENCIA 3: APIs habilitadas ---
+WARNING: --filter : operator evaluation is changing for consistency across Google APIs.  config.name:firebase currently matches but will not match in the near future.  Run `gcloud topic filters` for details.
+NAME                          TITLE
+firebaserules.googleapis.com  Firebase Rules API
+firestore.googleapis.com      Cloud Firestore API
+
+--- EVIDENCIA 4: Indices compuestos ---
+NAME          QUERY_SCOPE  FIELD_PATH
+CICAgOjXh4EK  COLLECTION   status,updatedAt,__name__
+
+--- EVIDENCIA 5: Cuenta autenticada ---
+jhon.vargas2607@gmail.com

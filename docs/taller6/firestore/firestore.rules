@@ -1,0 +1,282 @@
+rules_version = '2';
+
+// =====================================================================
+// FacturaFlow Mobile Cloud — Reglas de seguridad de Cloud Firestore
+//
+// En el modelo relacional (docs/taller6/schema.sql) la integridad la
+// garantiza el motor mediante llaves foráneas, CHECK y UNIQUE. Firestore
+// no dispone de esas construcciones, de modo que las mismas reglas se
+// trasladan aquí, donde el servidor las evalúa en cada escritura.
+//
+// Reglas trasladadas desde el modelo relacional:
+//   Issue #40 — el motivo de rechazo exige al menos 10 caracteres
+//   Issue #41 — el número de factura es único por proveedor
+//   Issue #42 — el motivo solo existe mientras el estado es 'rechazada'
+//   Permisos por rol — emisor, contador y administrador
+//   Flujo de estados — las transiciones que admite Invoice en Dart
+//
+// Las pruebas de estas reglas viven en ./tests y se ejecutan contra el
+// emulador de Firestore (ver tests/README.md).
+// =====================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- Identidad y rol --------------------------------------------
+    // El perfil se guarda en /users/{uid}, con el uid de Firebase Auth
+    // como identificador del documento.
+
+    function autenticado() {
+      return request.auth != null;
+    }
+
+    function perfil() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function rol() {
+      return perfil().role;
+    }
+
+    function esEmisor()        { return rol() == 'emisor'; }
+    function esContador()      { return rol() == 'contador'; }
+    function esAdministrador() { return rol() == 'administrador'; }
+
+    // Equivale a UserRole.canCreateInvoices.
+    function puedeCrearFacturas() {
+      return esEmisor() || esAdministrador();
+    }
+
+    // Equivale a UserRole.canReviewInvoices.
+    function puedeRevisarFacturas() {
+      return esContador() || esAdministrador();
+    }
+
+    // Equivale a UserRole.canSeeAllInvoices.
+    function veTodasLasFacturas() {
+      return !esEmisor();
+    }
+
+    // --- Validación del dominio -------------------------------------
+
+    // Reproduce el tipo enumerado invoice_status de PostgreSQL.
+    function estadoValido(estado) {
+      return estado in ['borrador', 'enviada', 'aprobada', 'rechazada'];
+    }
+
+    // Issue #40 — equivale a ck_invoice_rejection_reason_length.
+    // Un motivo de un solo carácter no justifica un rechazo.
+    function motivoSuficiente(motivo) {
+      return motivo is string && motivo.trim().size() >= 10;
+    }
+
+    // Issue #42 — equivale a ck_invoice_rejection_requires_status.
+    // El motivo existe si y solo si el estado es 'rechazada'; al reabrir
+    // o reenviar la factura, el motivo debe quedar en null.
+    function motivoCoherenteConEstado(datos) {
+      return datos.status == 'rechazada'
+          ? motivoSuficiente(datos.get('rejectionReason', null))
+          : datos.get('rejectionReason', null) == null;
+    }
+
+    // Equivale a las restricciones CHECK de invoice_item.
+    function itemValido(datos) {
+      return datos.quantity is int && datos.quantity > 0
+          && datos.unitPriceCents is int && datos.unitPriceCents > 0
+          && datos.taxRate is number && datos.taxRate >= 0 && datos.taxRate <= 1
+          && datos.description is string && datos.description.trim().size() >= 1
+          && datos.lineNumber is int && datos.lineNumber >= 1;
+    }
+
+    // Equivale a ck_invoice_number y a la coherencia de campos obligatorios.
+    function facturaValida(datos) {
+      return datos.number is string && datos.number.trim().size() >= 3
+          && datos.supplierId is string
+          && datos.createdById is string
+          && estadoValido(datos.status)
+          && motivoCoherenteConEstado(datos);
+    }
+
+    // --- Permisos sobre una factura ---------------------------------
+
+    function factura(id) {
+      return get(/databases/$(database)/documents/invoices/$(id)).data;
+    }
+
+    // Estado de la factura tal como quedará al terminar la escritura en
+    // curso. Permite crear una factura y sus ítems en el mismo lote.
+    function facturaTrasEscritura(id) {
+      return getAfter(/databases/$(database)/documents/invoices/$(id)).data;
+    }
+
+    // El emisor solo ve las suyas; contador y administrador ven todas.
+    function puedeLeerFactura(f) {
+      return veTodasLasFacturas() || f.createdById == request.auth.uid;
+    }
+
+    // Equivale a Invoice.canBeEditedBy: estado editable, rol que crea
+    // facturas y ser el dueño o un administrador.
+    function puedeEditarFactura(f) {
+      return puedeCrearFacturas()
+          && f.status in ['borrador', 'rechazada']
+          && (f.createdById == request.auth.uid || esAdministrador());
+    }
+
+    // --- /users ------------------------------------------------------
+    // Los perfiles los crea la administración (Admin SDK), nunca un
+    // cliente: así nadie puede asignarse un rol por su cuenta.
+    match /users/{userId} {
+      allow read: if autenticado()
+                  && (request.auth.uid == userId || veTodasLasFacturas());
+
+      // Un usuario corrige su nombre, pero nunca su rol ni su correo.
+      allow update: if autenticado()
+                    && request.auth.uid == userId
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['fullName', 'updatedAt']);
+
+      allow create, delete: if false;   // Alta y baja: solo administración.
+    }
+
+    // --- /suppliers --------------------------------------------------
+    // El identificador del documento es el NIT normalizado (sin puntos),
+    // de modo que Firestore impide el duplicado por construcción
+    // (equivale a uq_supplier_tax_id). El dígito de verificación lo
+    // valida la aplicación (Issue #35): las reglas no admiten bucles.
+    match /suppliers/{taxId} {
+      allow read: if autenticado();
+
+      allow create: if autenticado() && puedeCrearFacturas()
+                    && request.resource.data.taxId == taxId
+                    && taxId.matches('^[0-9]{5,15}(-[0-9])?$')
+                    && request.resource.data.name is string
+                    && request.resource.data.name.trim().size() >= 1;
+
+      // Solo se corrige la razón social; el NIT es la identidad.
+      allow update: if autenticado() && puedeCrearFacturas()
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['name']);
+
+      // Equivale a ON DELETE RESTRICT: no se borra un proveedor.
+      allow delete: if false;
+    }
+
+    // --- /invoices ---------------------------------------------------
+    // Issue #41: el identificador del documento es "{NIT}_{numero}", de
+    // modo que la pareja (número, proveedor) es única por construcción,
+    // igual que uq_invoice_number_supplier. Dos proveedores distintos sí
+    // pueden emitir el mismo número, porque el NIT forma parte del id.
+    match /invoices/{invoiceId} {
+
+      allow read: if autenticado() && puedeLeerFactura(resource.data);
+
+      allow create: if autenticado() && puedeCrearFacturas()
+                    && facturaValida(request.resource.data)
+                    && request.resource.data.createdById == request.auth.uid
+                    && request.resource.data.status == 'borrador'
+                    && request.resource.data.updatedAt == request.time
+                    && invoiceId == request.resource.data.supplierId
+                                    + '_' + request.resource.data.number;
+
+      // El número, el proveedor y el autor forman la identidad de la
+      // factura: el id del documento depende de los dos primeros.
+      function identidadIntacta() {
+        return request.resource.data.createdById == resource.data.createdById
+            && request.resource.data.number == resource.data.number
+            && request.resource.data.supplierId == resource.data.supplierId;
+      }
+
+      // Dueño o administrador: editar, enviar, reabrir y reenviar.
+      // Es el flujo de Invoice en Dart; un emisor nunca puede llevar su
+      // propia factura a 'aprobada' ni a 'rechazada'.
+      function cambioDelEmisor() {
+        let antes = resource.data.status;
+        let despues = request.resource.data.status;
+        return puedeEditarFactura(resource.data)
+            && ((antes == 'borrador'  && despues in ['borrador', 'enviada'])
+             || (antes == 'rechazada' && despues in ['rechazada', 'borrador', 'enviada']));
+      }
+
+      // Revisor: solo cambia el estado de una factura enviada, nunca la
+      // propia, y nunca el contenido.
+      function revisionDelContador() {
+        return puedeRevisarFacturas()
+            && resource.data.status == 'enviada'
+            && request.resource.data.status in ['aprobada', 'rechazada']
+            && resource.data.createdById != request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['status', 'rejectionReason', 'updatedAt']);
+      }
+
+      allow update: if autenticado()
+                    && facturaValida(request.resource.data)
+                    && identidadIntacta()
+                    && request.resource.data.updatedAt == request.time
+                    && (cambioDelEmisor() || revisionDelContador());
+
+      // Solo se elimina un borrador, por su dueño o un administrador.
+      allow delete: if autenticado()
+                    && resource.data.status == 'borrador'
+                    && puedeEditarFactura(resource.data);
+
+      // --- Subcolección items -------------------------------------
+      // Equivale a invoice_item con ON DELETE CASCADE. La lectura hereda
+      // el permiso de la factura: quien no puede ver la factura tampoco
+      // ve sus líneas.
+      match /items/{itemId} {
+        allow read: if autenticado() && puedeLeerFactura(factura(invoiceId));
+
+        allow create, update: if autenticado()
+                              && itemValido(request.resource.data)
+                              && puedeEditarFactura(facturaTrasEscritura(invoiceId));
+
+        allow delete: if autenticado()
+                      && puedeEditarFactura(factura(invoiceId));
+      }
+
+      // --- Subcolección events ------------------------------------
+      // Bitácora de auditoría append-only (equivale a invoice_event):
+      //   - el actor es quien escribe, nunca otro usuario;
+      //   - el estado del evento es el que la factura queda tras la
+      //     escritura, así que no se puede registrar una transición que
+      //     no ocurrió;
+      //   - la marca de tiempo es la del servidor, así que no se puede
+      //     fechar un evento en el pasado.
+      match /events/{eventId} {
+        allow read: if autenticado() && puedeLeerFactura(factura(invoiceId));
+
+        allow create: if autenticado()
+                      && request.resource.data.actorId == request.auth.uid
+                      && estadoValido(request.resource.data.status)
+                      && request.resource.data.description is string
+                      && request.resource.data.occurredAt == request.time
+                      && puedeLeerFactura(facturaTrasEscritura(invoiceId))
+                      && request.resource.data.status
+                           == facturaTrasEscritura(invoiceId).status;
+
+        // Un registro de auditoría no se modifica.
+        allow update: if false;
+
+        // Solo se borra junto con un borrador eliminado: es la cascada
+        // de ON DELETE CASCADE, limitada a lo que la factura admite.
+        allow delete: if autenticado()
+                      && factura(invoiceId).status == 'borrador'
+                      && puedeEditarFactura(factura(invoiceId));
+      }
+    }
+
+    // --- /sessions ---------------------------------------------------
+    // Las sesiones las emite y revoca el backend. El cliente solo puede
+    // consultar las propias; nunca escribirlas.
+    match /sessions/{sessionId} {
+      allow read: if autenticado() && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // --- Cierre por defecto ------------------------------------------
+    // Cualquier ruta no contemplada queda denegada.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
