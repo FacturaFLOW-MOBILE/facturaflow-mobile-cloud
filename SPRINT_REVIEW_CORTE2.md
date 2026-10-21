@@ -1,150 +1,158 @@
 # Reporte de Sprint Review - Cierre de Corte II
 
-**Asignatura:** Mobile and Cloud Computing - IS0276 - 210  
-**Proyecto:** FacturaFLOW Mobile Cloud  
-**Repositorio oficial:** https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud  
-**Equipo de desarrollo:** David Santiago Piedrahita Cabeza (@santkd16) — Issues #34–#39 e integración #33; Jhon Vargas (@jhon9036) — Issues #40–#45, modelado cloud y mejora #32.  
-**Fecha prevista de la Sprint Review:** 21/10/2026.  
-**Estado del documento:** Preparación de la Review, corte de verificación 20/10/2026. No sustituye pruebas en vivo ni aprobaciones de terceros.  
-**Discusión de GitHub:** PENDIENTE de crear y enlazar.  
-**APK / Release:** PENDIENTE de generar y publicar.  
-**Video demostrativo (si aplica):** PENDIENTE de grabar y enlazar.
+**Asignatura:** Mobile and Cloud Computing - IS0276 - 210
 
-> **Criterio de transparencia:** este reporte distingue lo implementado, lo registrado en GitHub y lo pendiente de verificar. No se llama "Done" a un PR abierto, una prueba no ejecutada en el incremento integrado o una conexión cloud que no se haya demostrado desde la aplicación.
+**Proyecto:** FacturaFlow Mobile Cloud
 
-## 1. Resumen ejecutivo del incremento de software
+**Equipo de Desarrollo:**
+- David Santiago Piedrahita Cabeza - [@santkd16](https://github.com/santkd16) - Desarrollo Flutter (Issues #34–#39), API Django → Cloud Firestore (Issue #33, PR #63) e integración continua
+- Jhon Alexander Vargas Catuche - [@jhon9036](https://github.com/jhon9036) - Desarrollo Flutter (Issues #40–#45), modelado e implementación de la base de datos cloud (Taller 6, PR #61) y revisión de código
 
-FacturaFLOW es una aplicación Flutter con arquitectura MVVM que separa vistas, ViewModels y repositorios de datos. Incorpora roles de emisor, contador y administrador; creación, edición, envío, aprobación y rechazo de facturas; validaciones e historial de eventos. En la rama principal están disponibles repositorios demo y el cliente HTTP remoto (integrado mediante PR #51).
+**Fecha de la Sprint Review:** 21/10/2026
 
-El Corte II incluye correcciones y refactorizaciones específicas de los Issues #34–#45 y el trabajo de modelado y persistencia del Taller 6. Las correcciones de Jhon (#40–#45) fueron fusionadas; las de Santiago (#34–#39) están implementadas en sus ramas y propuestas mediante PR separados, pero permanecen abiertas. El material del Taller 6 (Django, PostgreSQL, diagrama, diccionario, archivos y scripts de Cloud Firestore) existe en el PR #61 y todavía no está integrado a main.
+**Enlace a la Discusión en GitHub Discussions:** PENDIENTE — se enlaza al publicarla
 
-**Limitación actual:** en main la configuración \`DEMO_MODE\` tiene por defecto el valor \`true\`. El backend Django del PR #61 contiene modelos y migraciones, pero \`backend/facturaflow/urls.py\` no expone aún los endpoints REST utilizados por Flutter. No hay evidencia verificada aquí de creación/edición de facturas *desde la app móvil* reflejada en Cloud SQL o Firestore. Esta integración sigue pendiente, vinculada con los Issues #32 y #33.
+**Enlace a la Demo en Video (si aplica):** PENDIENTE
 
-## 2. Matriz de trazabilidad: HU y Bugs del Sprint (Taller 5)
-
-Estado verificado con los PR de GitHub el 20/10/2026. "Incompleto" significa que aún no cumple toda la Definition of Done del Taller 7 (revisión, merge y demostración cloud), aunque exista código y pruebas por rama.
-
-| Tipo | Issue | Incidencia / cambio | Responsable | Rama | Pull Request | Estado |
-| --- | --- | --- | --- | --- | --- | --- |
-| Bug | [#34](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/34) | Búsqueda por ítems y monto | @santkd16 | santiago/issue-34-busqueda-facturas | [#54](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/54) abierto → dev | Incompleto: merge/review/cloud |
-| Bug | [#35](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/35) | Validación de NIT | @santkd16 | santiago/issue-35-validacion-nit | [#55](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/55) abierto → dev | Incompleto: merge/review/cloud |
-| Bug | [#36](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/36) | Modo demo por defecto | @santkd16 | santiago/issue-36-modo-produccion | [#56](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/56) abierto → dev | Incompleto: merge/review/cloud |
-| Bug | [#37](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/37) | Parseo de moneda | @santkd16 | santiago/issue-37-parseo-moneda | [#57](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/57) abierto → dev | Incompleto: merge/review/cloud |
-| Mejora | [#38](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/38) | Formatos mediante intl | @santkd16 | santiago/issue-38-formatos-intl | [#58](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/58) abierto → dev | Incompleto: merge/review/cloud |
-| Mejora | [#39](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/39) | Datos demo desde JSON | @santkd16 | santiago/issue-39-demo-assets | [#59](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/59) abierto → dev | Incompleto: merge/review/cloud |
-| Bug | [#40](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/40) | Motivo mínimo de rechazo | @jhon9036 | jhon/issue-40-validacion-rechazo | [#47](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/47) fusionado → main | Código integrado; falta demo cloud |
-| Bug | [#41](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/41) | Número único por NIT | @jhon9036 | jhon/issue-41-duplicidad-numero-nit | [#48](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/48) fusionado → main | Código integrado; falta demo cloud |
-| Bug | [#42](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/42) | Limpiar motivo al reabrir | @jhon9036 | jhon/issue-42-limpiar-motivo-reapertura | [#46](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/46) fusionado → main | Código integrado; falta demo cloud |
-| Mejora | [#43](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/43) | Cliente HTTP remoto | @jhon9036 | jhon/issue-43-cliente-http | [#51](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/51) fusionado → main | Cliente integrado; API aún pendiente |
-| Mejora | [#44](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/44) | Navegación go_router | @jhon9036 | jhon/issue-44-go-router | [#50](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/50) fusionado → main | Código integrado; revisión aprobada registrada |
-| Mejora | [#45](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/45) | Design tokens | @jhon9036 | jhon/issue-45-design-tokens | [#49](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/49) fusionado → main | Código integrado; falta demo integrada |
-
-**Corrección de dependencias:** [PR #53](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/53) fue fusionado a main para restaurar \`http\` después de la integración del enrutador.
-
-**Verificaciones CI observadas:** las últimas ejecuciones automáticas disponibles para los PR #54–#59 finalizaron con \`success\` en sus ramas individuales. Esto no equivale a probar todos los cambios combinados en main o en Android.
-
-## 3. Integración y persistencia con la base de datos cloud (Taller 6)
-
-**Diseño relacional:** PostgreSQL 17, con seis tablas (app_user, supplier, invoice, invoice_item, invoice_event, auth_session).  
-**Implementación documental y scripts cloud:** Cloud Firestore, modelado en el [PR #61](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/61), todavía abierto.  
-**Carpeta técnica:** [docs/taller6](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/tree/docs/taller-6-modelado-bd/docs/taller6).
-
-El PR #61 declara el proyecto \`facturaflow-mcc-2026\`, base \`(default)\`, región \`nam5\`, y documenta los resultados de 50 aserciones sobre PostgreSQL, Django y Firestore. Son **resultados aportados en el PR**, no una nueva ejecución ni una prueba de extremo a extremo Flutter→Cloud verificada en esta Review.
-
-Existe además un proyecto Firebase utilizado durante la preparación por el equipo con ID \`facturaflow-mobile-cloud\`; **son IDs distintos**. Antes de la presentación debe escogerse y comprobarse el proyecto cloud efectivo, su contenido actual y sus reglas.
-
-**Cuenta del docente:** \`endiromero@gmail.com\`. El PR #61 documenta \`roles/datastore.viewer\` sobre el proyecto de Jhon; hay que verificar en IAM que el permiso siga vigente. Esta revisión de GitHub no permite comprobar directamente IAM.
-
-**Persistencia móvil-cloud — PENDIENTE de evidencia:**
-1. Ejecutar app en dispositivo o emulador Android con una API cloud real, \`DEMO_MODE=false\` y \`API_BASE_URL\` operativo.
-2. Crear una factura desde la app, registrar su número e ID y mostrar el registro en la consola/consulta de la base.
-3. Editar la factura desde la app y comprobar la actualización persistida.
-4. Consultar de nuevo tras reiniciar la aplicación y verificar que la factura sigue allí.
-5. Mostrar las relaciones factura-proveedor-items-eventos de acuerdo con el ER y el diccionario del Taller 6.
-
-**No confundir:** correr Flutter con \`DEMO_MODE=true\`, visualizar documentos Firestore desde la consola o ejecutar scripts Python de carga no demuestra por sí solo lectura/escritura desde la aplicación móvil.
-
-### Riesgos técnicos abiertos
-
-- El PR #61 aún no expone las rutas REST de Django que consume el cliente HTTP.
-- Se requiere un servidor accesible desde el dispositivo y credenciales configuradas de forma segura.
-- Antes de utilizar las reglas Firestore en producción se deben probar permisos por rol, acceso a subcolecciones y transiciones de estados desde clientes autenticados.
-- Los scripts de carga y verificación del PR #61 pueden eliminar registros preexistentes; usar solo un entorno de prueba o hacerlos no destructivos.
-- La instancia Cloud SQL exige facturación habilitada; no declarar un despliegue PostgreSQL en GCP sin evidencia de la instancia.
-
-## 4. Auditoría del flujo Git y Code Review
-
-**Regla de ramas:** se identifican ramas independientes de Santiago para #34–#39 y de Jhon para #40–#45.
-
-**PR individuales:** todos los Issues #34–#45 cuentan con un PR propio. Los PR de Santiago (#54–#59) permanecen abiertos con destino \`dev\`; los PR de Jhon (#46–#51) están integrados en \`main\`. \`main\`, \`dev\` y \`feature/taller6-firebase\` apuntaban al mismo commit \`6a61680\` durante la verificación.
-
-**Code Reviews:** existe una revisión \`APPROVED\` de @santkd16 en el PR #50; en los PR #46–#49 y #51 se observaron revisiones \`COMMENTED\`. En los PR #54–#59 y #61 no se observaron revisiones aprobadas. No inventar una aprobación: cada integrante debe revisar realmente el código y registrar su revisión antes del merge.
-
-**Acciones pendientes:**
-- Solicitar y completar code review de #54–#59, resolver los comentarios y fusionarlos en orden verificando conflictos entre #37 y #38.
-- Revisar los problemas de seguridad y pruebas del PR #61; fusionarlo solo después de validación.
-- Ejecutar \`flutter analyze\`, \`flutter test\`, compilación APK y smoke test en el commit de la rama principal resultante.
-- Conservar enlaces a los comentarios de revisión y capturas de los merges.
-
-## 5. Definition of Done (DoD)
-
-| Criterio | Estado 20/10/2026 | Evidencia / razón |
-| --- | --- | --- |
-| Flutter compila en el incremento final/main | PENDIENTE | Ejecutar pruebas y build después de integrar PR |
-| Ramas individuales por HU/Bug | SÍ | Ramas #34–#45 identificadas en GitHub |
-| PR independientes enlazados | SÍ | #46–#51 y #54–#59 |
-| Todos los PR revisados y aprobados | NO | Faltan aprobaciones formales en PR abiertos |
-| Todos los cambios del sprint integrados | NO | #54–#59 pendientes |
-| Modelo ER y diccionario elaborados | SÍ, en PR | PR #61, pendiente merge |
-| Persistencia real desde app hacia cloud | NO VERIFICADO | Issues #32 y #33 abiertos; falta demo E2E |
-| Acceso del profesor en cloud | POR VERIFICAR | Verificar IAM con captura actual |
-| APK o demo móvil para la Review | PENDIENTE | Generar y enlazar Release o video |
-| Discussion de Sprint Review y comentarios individuales | PENDIENTE | Crear Discussion y registrar aportes reales |
-| Documento SPRINT_REVIEW_CORTE2.md | EN PREPARACIÓN | Este archivo debe revisarse, completar evidencias y fusionarse |
-
-La clasificación "Done" se reserva para cambios revisados, integrados, probados y demostrados según la rúbrica.
-
-## 6. Balance de acciones de mejora del Corte I (Taller 4)
-
-Fuente: [docs/Restropectiva.md](docs/Restropectiva.md) y Discussions del Corte I:
-- [Discussion #29 — Qué se hizo bien](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/discussions/29)
-- [Discussion #30 — Qué se puede mejorar](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/discussions/30)
-- [Discussion #31 — Qué acciones propones](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/discussions/31)
-
-| Acción retro-action | Issue | Resultado | Estado |
-| --- | --- | --- | --- |
-| Integrar datos reales y completar selección de empresa, carga y OCR | [#32](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/32) | Modelo cloud documentado en PR #61; pantallas y persistencia móvil pendientes | Abierto |
-| Integrar Flutter con Django REST | [#33](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/33) | Cliente HTTP del PR #51 integrado; endpoints reales y despliegue pendientes | Abierto |
-| Mejorar trazabilidad con ramas y PR por incidencia | #34–#45 | Cada incidencia trabajada tiene rama y PR independiente; cierres incompletos | Parcial |
-| Fortalecer pruebas automáticas | PR #54–#59 | Últimas ejecuciones CI de esas ramas exitosas; pruebas del incremento combinado pendientes | Parcial |
-
-**Aprendizaje:** separar responsabilidades en MVVM y trabajar por PR mejora la auditabilidad; para afirmar la finalización de una HU hace falta integrar, revisar y demostrar la persistencia real, no solo ejecutar tests locales.
-
-## 7. Adaptaciones y proyección para el Corte III
-
-**Deuda técnica / Not Done:** completar la API Django REST y la conexión real con PostgreSQL/Firestore; pruebas de permisos; sincronización de identidad; funciones de empresa/documentos/OCR; consolidar PR de Santiago y el PR #61; automatizar build móvil y evidencia cloud.
-
-**Próximos pasos priorizados:**
-1. Resolver revisiones, dependencias y merge de #54–#59 y #61; estabilizar main.
-2. Cerrar técnicamente #33: endpoints de autenticación y facturas, servicio HTTPS, pruebas de lectura/escritura desde Flutter.
-3. Continuar #32: selección de empresa, carga XML/PDF/imágenes, cámara y OCR.
-4. Añadir pruebas de integración, seguridad y persistencia en CI; actualizar backlog y Definition of Done según feedback del docente.
-
-**Feedback del docente durante la Sprint Review:** PENDIENTE de registrar.
-
-## 8. Evidencias y guion de sustentación (pendientes de adjuntar)
-
-- Evidencia A — \`flutter analyze\`, \`flutter test\` y \`flutter build apk --release\` en main con commit visible.
-- Evidencia B — App en Android: inicio de sesión, crear factura, envío, rechazo/aprobación y búsqueda.
-- Evidencia C — Consola de nube: lectura/escritura de **la misma factura** originada desde la app, antes/después, con marcas temporales y reinicio.
-- Evidencia D — Diagrama ER, diccionario de datos y estructura real de tablas/colecciones.
-- Evidencia E — IAM/Firebase mostrando acceso de \`endiromero@gmail.com\` con mínimo privilegio.
-- Evidencia F — Páginas de PR con comentarios de revisión aprobados y estado merged; Issue vinculado.
-- Evidencia G — GitHub Discussion con dos intervenciones individuales, captura y enlaces.
-- Evidencia H — Enlace al APK de GitHub Releases o video técnico de máximo 8 a 10 minutos si la sustentación es asincrónica.
-
-Ver [guion y checklist](docs/taller7/GUIA_DEMO_Y_EVIDENCIAS.md) para el orden de pruebas y las verificaciones que faltan.
+**Enlace al APK / Release:** PENDIENTE
 
 ---
 
-**Regla para el cierre:** actualizar enlaces y los campos PENDIENTE con evidencias reales, crear la discusión y recibir feedback; hacer commit y merge del reporte final mediante PR. El archivo no constituye una certificación de despliegue o de aprobación del profesor.
+## 1. Resumen Ejecutivo del Incremento de Software
+
+FacturaFlow es una aplicación Flutter para Android que registra facturas de proveedores y las lleva por un flujo de revisión: el emisor crea y envía, el contador aprueba o rechaza con un motivo, y cada cambio queda en una bitácora. La arquitectura es MVVM: las vistas consumen ViewModels mediante Provider, y los ViewModels dependen de interfaces de repositorio con dos implementaciones, una de demostración en memoria y otra remota por HTTP.
+
+El incremento del Corte II se compone de:
+
+- **Correcciones de los 12 reportes del docente.** Las de los Issues #40–#45 están integradas en `main`; las de los Issues #34–#39 tienen PR revisado y pendiente de merge.
+- **Modelo de datos.** Diagrama ER, diccionario de datos y esquema validado en PostgreSQL 17, e implementación en Cloud Firestore (Taller 6, [PR #61](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/61)).
+- **Persistencia real.** Una API Django expone el contrato REST que la app ya consumía y guarda los datos en Firestore ([PR #63](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/63)). Con `DEMO_MODE=false`, la app deja los datos de ejemplo y lee y escribe en la nube a través de esa API.
+
+**Estado de la persistencia desde el teléfono:** PENDIENTE de evidencia (sección 3).
+
+**Limitación conocida:** la API se ejecuta en el PC del equipo y el teléfono la alcanza por USB (`adb reverse`). Publicarla en Cloud Run exige habilitar facturación en el proyecto, que no está activa; por eso no hay todavía un servidor HTTPS público para una APK de release.
+
+---
+
+## 2. Matriz de Trazabilidad: Historias de Usuario y Bugs del Sprint (Taller 5)
+
+El Sprint del Taller 5 no incluyó historias de usuario: los 12 ítems son reportes del docente (@endijromero), clasificados por él como bug o *code smell*. Estado verificado en GitHub el 20/10/2026.
+
+| Tipo (HU/Bug) | ID Issue | Título de la Incidencia | Responsable | Rama Git | Pull Request (PR) | Estado (Done / Incomplete) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Bug | [#34](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/34) | Búsqueda limitada en facturas | @santkd16 | `santiago/issue-34-busqueda-facturas` | [#54](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/54) (abierto → `dev`; aprobado) | Incomplete: falta merge |
+| Bug | [#35](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/35) | Validación incompleta del NIT | @santkd16 | `santiago/issue-35-validacion-nit` | [#55](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/55) (abierto → `dev`; aprobado) | Incomplete: falta merge |
+| Bug | [#36](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/36) | Fallo en modo producción por defecto | @santkd16 | `santiago/issue-36-modo-produccion` | [#56](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/56) (abierto → `dev`; aprobado) | Incomplete: falta merge |
+| Bug | [#37](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/37) | Error de parseo de moneda | @santkd16 | `santiago/issue-37-parseo-moneda` | [#57](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/57) (abierto → `dev`; aprobado) | Incomplete: falta merge |
+| Code Smell | [#38](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/38) | Formateador de moneda y fecha manual | @santkd16 | `santiago/issue-38-formatos-intl` | [#58](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/58) (abierto → `dev`; aprobado) | Incomplete: falta merge |
+| Code Smell | [#39](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/39) | Datos hardcodeados en producción | @santkd16 | `santiago/issue-39-demo-assets` | [#59](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/59) (abierto → `dev`; cambios solicitados) | Incomplete: corregir NIT del JSON y merge |
+| Bug | [#40](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/40) | Falta de validación en comentario de rechazo | @jhon9036 | `jhon/issue-40-validacion-rechazo` | [#47](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/47) (merged → `main`; revisión posterior al merge) | Incomplete: falta prueba con persistencia cloud |
+| Bug | [#41](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/41) | Duplicidad de número de factura global | @jhon9036 | `jhon/issue-41-duplicidad-numero-nit` | [#48](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/48) (merged → `main`; revisión posterior al merge) | Incomplete: falta prueba con persistencia cloud |
+| Bug | [#42](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/42) | Inconsistencia del motivo de rechazo al reabrir | @jhon9036 | `jhon/issue-42-limpiar-motivo-reapertura` | [#46](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/46) (merged → `main`; revisión posterior al merge) | Incomplete: falta prueba con persistencia cloud |
+| Bug | [#43](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/43) | Ausencia de implementación de cliente HTTP | @jhon9036 | `jhon/issue-43-cliente-http` | [#51](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/51) (merged → `main`; revisión posterior al merge) | Incomplete: falta prueba con persistencia cloud |
+| Code Smell | [#44](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/44) | Navegación mágica (magic strings) | @jhon9036 | `jhon/issue-44-go-router` | [#50](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/50) (merged → `main`; aprobado antes del merge) | Done |
+| Code Smell | [#45](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/45) | Uso de valores mágicos en UI | @jhon9036 | `jhon/issue-45-design-tokens` | [#49](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/49) (merged → `main`; revisión posterior al merge) | Done |
+
+Trabajo asociado al Sprint:
+
+- [PR #53](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/53) (merged): restauró la dependencia `http`, que se perdió al integrar el enrutador.
+- [PR #61](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/61) (abierto): modelo de datos del Taller 6.
+- [PR #63](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/63) (abierto): API Django → Firestore (Issue #33).
+
+---
+
+## 3. Integración y Persistencia con la Base de Datos Cloud (Taller 6)
+
+- **Plataforma Cloud utilizada:** Google Cloud Firestore en modo nativo. Proyecto `facturaflow-mcc-2026`, base `(default)`, región `nam5`, sin facturación habilitada. La app no accede a Firestore directamente: llama a la API Django del PR #63, que usa credenciales de servidor (IAM).
+
+- **Cuenta con acceso docente:** `endiromero@gmail.com` (Verificada: Sí). Rol `roles/datastore.viewer` (solo lectura), comprobado con `gcloud projects get-iam-policy facturaflow-mcc-2026` el 20/10/2026.
+
+- **Coherencia con el Modelo ER y Diccionario de Datos:**
+
+  El modelo relacional del Taller 6 ([diagrama ER, diccionario y esquema](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/tree/docs/taller-6-modelado-bd/docs/taller6)) se traduce a Firestore así:
+
+  | Entidad (ER) | Colección en Firestore | Cómo se conserva la regla del modelo |
+  | :--- | :--- | :--- |
+  | `app_user` | `/users/{id}` | Perfil y rol. El hash de la contraseña se separa en `/credentials/{id}`, que ningún cliente puede leer |
+  | `supplier` | `/suppliers/{NIT}` | El NIT es el id del documento: equivale a `UNIQUE (tax_id)` |
+  | `invoice` | `/invoices/{NIT}_{número}` | El id compuesto equivale a `UNIQUE (number, supplier_id)` del Issue #41 |
+  | `invoice_item` | `/invoices/{id}/items/{línea}` | Subcolección: equivale a la llave foránea con `ON DELETE CASCADE` |
+  | `invoice_event` | `/invoices/{id}/events/{evento}` | Subcolección: bitácora de auditoría |
+  | `auth_session` | `/sessions/{id}` | Guarda el hash del token, nunca el token |
+
+  Los campos conservan los nombres del diccionario en *camelCase* (`tax_id` → `taxId`, `unit_price_cents` → `unitPriceCents`). La factura guarda además `supplierName`, `createdByName` y los totales, porque Firestore no tiene `JOIN`. Las reglas de los Issues #40, #41 y #42, que en PostgreSQL son restricciones `CHECK` y `UNIQUE`, las valida la API en el servidor.
+
+- **Evidencias de Persistencia en Tiempo Real:**
+
+  PENDIENTE: capturas de la app en el teléfono y de la consola de Firestore mostrando la misma factura (crear, enviar, aprobar o rechazar, y releer tras reiniciar la app).
+
+  La app no escucha cambios en tiempo real. Lo que hace en el teléfono aparece de inmediato en Firestore, y los cambios hechos desde otra sesión se ven en la app al deslizar la lista hacia abajo para recargarla.
+
+---
+
+## 4. Auditoría de Flujo Git y Code Review
+
+- **Cumplimiento de la regla de ramas individuales:** cada uno de los 12 Issues tiene su rama, creada por su responsable: `santiago/issue-34…39-*` y `jhon/issue-40…45-*`. El trabajo del Taller 6 está en `docs/taller-6-modelado-bd` y la API en `santiago/issue-33-django-firestore`. Ninguna rama se eliminó tras el merge, para conservar la trazabilidad.
+
+- **Code Review y Aprobación de Pull Requests:**
+
+  | PR | Revisión | Antes del merge |
+  | :--- | :--- | :--- |
+  | [#50](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/50#pullrequestreview-5398921083) | @santkd16: aprobado | Sí |
+  | [#46](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/46#pullrequestreview-5401748065), [#47](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/47#pullrequestreview-5401748106), [#48](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/48#pullrequestreview-5401748148), [#49](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/49#pullrequestreview-5401748198), [#51](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/51#pullrequestreview-5401748238), [#53](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/53#pullrequestreview-5401748277) | @santkd16: comentarios | No: revisión posterior al merge |
+  | [#54](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/54#pullrequestreview-5594741547), [#55](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/55#pullrequestreview-5594741730), [#56](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/56#pullrequestreview-5594741923), [#57](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/57#pullrequestreview-5594742114), [#58](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/58#pullrequestreview-5594742255) | @jhon9036: aprobado | Sí (pendientes de merge) |
+  | [#59](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/59#pullrequestreview-5594742400) | @jhon9036: cambios solicitados (NIT inválidos en el JSON) | Sí |
+  | [#61](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/61#pullrequestreview-5590456037) | @santkd16: 4 hallazgos; corregidos y nueva revisión solicitada | Sí |
+  | [#63](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/pull/63#pullrequestreview-5594981953) | @jhon9036: cambios solicitados (normalización del NIT) | Sí |
+
+  Las revisiones de @jhon9036 verificaron el código antes de opinar: los seis PR #54–#59 se integraron en una simulación sobre `dev` sin conflictos y con 145 pruebas en verde, y la API del PR #63 se probó con 48 comprobaciones HTTP contra el emulador de Firestore.
+
+---
+
+## 5. Verificación de la Definition of Done (DoD)
+
+| Criterio de la Definition of Done (DoD) | Cumplimiento | Evidencia / Justificación |
+| :--- | :---: | :--- |
+| Código compila sin errores en la rama principal | ✅ | `main` en `6a61680`: `flutter analyze` sin problemas, 134 pruebas en verde y `flutter build apk --release` correcto (20/10/2026) |
+| Ramas individuales creadas por cada HU/Bug | ✅ | 12 ramas, una por Issue (sección 4) |
+| Pull Requests individuales enlazados a issues | ❌ | Cada Issue tiene su propio PR, pero los PR #54–#59 apuntan a `dev`: GitHub solo enlaza el cierre (`Closes #N`) cuando el PR va a la rama por defecto, y los Issues #34–#39 no quedan vinculados |
+| Code review realizado y aprobado por pares | ❌ | De los PR de @jhon9036, solo #50 tuvo aprobación antes del merge; #46–#49, #51 y #53 se revisaron después. Los PR #54–#58 están aprobados y #59 tiene cambios solicitados, todos sin merge |
+| Persistencia funcional en la base de datos cloud | ❌ | PENDIENTE: prueba de punta a punta app → API → Firestore en el teléfono |
+| Acceso otorgado a endiromero@gmail.com | ✅ | `roles/datastore.viewer` sobre `facturaflow-mcc-2026`, verificado el 20/10/2026 |
+| Pruebas de usuario y verificación funcional | ❌ | PENDIENTE: recorrido en el teléfono con emisor y contador |
+
+---
+
+## 6. Balance de Acciones de Mejora del Corte I (Taller 4)
+
+La retrospectiva del Corte I ([#29](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/discussions/29), [#30](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/discussions/30), [#31](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/discussions/31)) dejó dos acciones registradas como Issues. No se creó la etiqueta `retro-action`, así que se identifican por su número.
+
+| Acción de mejora | Issue | Resultado en el Corte II |
+| :--- | :--- | :--- |
+| Conectar la app con la base de datos en la nube y desarrollar las pantallas pendientes del prototipo | [#32](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/32) (@jhon9036) | Parcial. La conexión se resolvió con la API del PR #63. Las pantallas de selección de empresa, carga de archivos, cámara y OCR no se iniciaron |
+| Integrar Flutter con el backend Django REST | [#33](https://github.com/FacturaFLOW-MOBILE/facturaflow-mobile-cloud/issues/33) (@santkd16) | Implementado en el PR #63, con cambios solicitados y sin merge. El Issue se cerró antes de la revisión; se propone reabrirlo hasta que el PR se fusione |
+
+Qué mejoró en el proceso:
+
+- **Flujo de ramas:** todas las incidencias del Sprint se trabajaron en una rama propia con PR independiente.
+- **Revisión de código:** en el Taller 5, seis PR (#46–#49, #51 y #53) se fusionaron antes de recibir revisión. En este cierre, los PR #54–#59, #61 y #63 se revisaron antes de cualquier merge, con pruebas que respaldan cada observación.
+- **Integración continua:** los PR #54–#59, #62 y #63 incorporan workflows de GitHub Actions que ejecutan `flutter analyze` y `flutter test`; los de #62 y #63 compilan además la APK, y el de #63 ejecuta las pruebas de la API. Todavía no están en `main`.
+
+---
+
+## 7. Adaptaciones y Proyección para el Corte III
+
+- **Lecciones aprendidas durante la Sprint Review:** PENDIENTE: se registran después de la sesión con el docente.
+
+- **Deuda técnica o ítems pendientes (Not Done):**
+  - Merge de los PR #54–#59, #61 y #63 tras resolver los cambios solicitados.
+  - Publicar la API en un servidor HTTPS; Cloud Run requiere habilitar facturación.
+  - Validar el dígito de verificación del NIT en la API, después de corregir los NIT de los datos existentes.
+  - Pantallas del prototipo pendientes del Issue #32: selección de empresa, carga de archivos, cámara y OCR.
+  - Limitar intentos de inicio de sesión y usar una cuenta de servicio con permisos mínimos en lugar de credenciales personales.
+
+- **Próximos pasos en el Product Backlog (Corte III):**
+  1. Multimedia: captura con cámara, carga de PDF y XML, y OCR para prellenar la factura.
+  2. Seguridad: API sobre HTTPS, límite de intentos de inicio de sesión y cuenta de servicio con permisos mínimos.
+  3. CI/CD: despliegue automático de la API y APK publicada en GitHub Releases desde Actions.
+  4. Sincronización: actualizar la lista sin recargar a mano.
