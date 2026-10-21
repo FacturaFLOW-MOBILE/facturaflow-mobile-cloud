@@ -1,6 +1,8 @@
 # Secretos y entorno local — nunca se versionan
 .env
+.env.firestore
 .venv/
 __pycache__/
 *.pyc
 *.sqlite3
+*.log
