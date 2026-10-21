@@ -1,0 +1,107 @@
+======================================================================
+PRUEBAS DE LAS REGLAS DE SEGURIDAD — Cloud Firestore (emulador local)
+Fecha: 2026-10-20 23:12 (hora de Colombia)
+======================================================================
+
+Comando:   (desde docs/taller6/firestore/tests)
+           firebase emulators:exec --only firestore --project demo-facturaflow
+             --config ../firebase.json
+             "node --test --test-reporter=spec reglas.test.mjs"
+           Es lo mismo que ejecuta `npm test`, con el reporter spec para
+           que la salida sea legible.
+Entorno:   Node.js v20.13.1 · firebase-tools 15.34.0 · OpenJDK 25.0.2
+           @firebase/rules-unit-testing 4.0.1 · firebase 11.10.0
+Proyecto:  demo-facturaflow (emulador; no toca la base en la nube)
+
+Se omiten las líneas de registro del SDK que informan cada
+PERMISSION_DENIED esperado; se conservan todas las líneas de resultado.
+
+----------------------------------------------------------------------
+1. Reglas actuales (docs/taller6/firestore/firestore.rules)
+----------------------------------------------------------------------
+▶ Reglas de seguridad de Cloud Firestore
+  ▶ Lectura y aislamiento entre usuarios
+    ✔ sin autenticación no se lee nada (1059.5141ms)
+    ✔ el emisor lee su propia factura (451.9524ms)
+    ✔ un emisor no lee la factura de otro emisor (212.3666ms)
+    ✔ hallazgo de revisión #2: tampoco lee sus ítems (261.7217ms)
+    ✔ hallazgo de revisión #2: tampoco lee su historial (228.055ms)
+    ✔ el contador sí lee los ítems de cualquier factura (160.8559ms)
+    ✔ el emisor lista solo las suyas filtrando por autor (280.8636ms)
+    ✔ el emisor no puede listar todas sin filtro (140.4461ms)
+  ▶ Lectura y aislamiento entre usuarios (2798.4141ms)
+  ▶ Issue #41 — número único por proveedor
+    ✔ crear con id {NIT}_{número} coherente se acepta (172.9168ms)
+    ✔ un id que no corresponde al NIT y número se rechaza (157.5378ms)
+    ✔ otro emisor no puede sobrescribir una factura con el mismo número y NIT (134.1528ms)
+  ▶ Issue #41 — número único por proveedor (465.3075ms)
+  ▶ Issue #40 — motivo de rechazo de al menos 10 caracteres
+    ✔ rechazar con un motivo de un carácter se rechaza (157.0328ms)
+    ✔ rechazar con una justificación real se acepta (136.1835ms)
+  ▶ Issue #40 — motivo de rechazo de al menos 10 caracteres (293.7201ms)
+  ▶ Issue #42 — el motivo solo existe en facturas rechazadas
+    ✔ reabrir conservando el motivo se rechaza (140.7772ms)
+    ✔ reabrir limpiando el motivo se acepta (120.7371ms)
+  ▶ Issue #42 — el motivo solo existe en facturas rechazadas (261.969ms)
+  ▶ Flujo de estados y separación de funciones
+    ✔ un emisor no puede aprobar su propio borrador (153.1364ms)
+    ✔ un emisor no puede aprobar su factura enviada (144.0917ms)
+    ✔ un administrador no revisa su propia factura (125.6835ms)
+    ✔ el contador aprueba una factura ajena enviada (124.3173ms)
+    ✔ el contador no puede cambiar el contenido al revisar (136.7578ms)
+    ✔ el emisor envía su borrador a revisión (112.3067ms)
+    ✔ no se puede cambiar el número ni el proveedor de una factura (149.905ms)
+    ✔ la marca de tiempo debe ser la del servidor (139.5934ms)
+  ▶ Flujo de estados y separación de funciones (1086.9963ms)
+  ▶ Bitácora de auditoría (events)
+    ✔ crear factura, ítem y evento en un mismo lote se acepta (162.2364ms)
+    ✔ un emisor no puede escribir eventos en la factura de otro (121.4475ms)
+    ✔ no se puede firmar un evento a nombre de otro usuario (109.6558ms)
+    ✔ no se puede registrar un estado distinto al de la factura (124.2093ms)
+    ✔ no se puede fechar un evento en el pasado (109.9978ms)
+    ✔ un evento no se puede modificar (111.0925ms)
+    ✔ aprobar y registrar el evento en un mismo lote se acepta (122.8997ms)
+  ▶ Bitácora de auditoría (events) (862.484ms)
+  ▶ Borrado (equivale a ON DELETE CASCADE / RESTRICT)
+    ✔ el dueño elimina su borrador con ítems e historial (112.2213ms)
+    ✔ no se elimina una factura enviada (95.211ms)
+    ✔ un emisor no elimina el borrador de otro (101.3157ms)
+    ✔ no se elimina un proveedor (RESTRICT) (94.2537ms)
+  ▶ Borrado (equivale a ON DELETE CASCADE / RESTRICT) (403.5604ms)
+  ▶ Perfiles y proveedores
+    ✔ un usuario no puede cambiarse el rol (103.1277ms)
+    ✔ un usuario sí puede corregir su nombre (103.9889ms)
+    ✔ un cliente no puede crear perfiles (99.3212ms)
+    ✔ un proveedor con NIT mal formado se rechaza (101.2228ms)
+  ▶ Perfiles y proveedores (408.1523ms)
+▶ Reglas de seguridad de Cloud Firestore (9478.8154ms)
+ℹ tests 38
+ℹ suites 9
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10150.0831
+
+----------------------------------------------------------------------
+2. Mismas pruebas contra las reglas anteriores (commit 5368d4c)
+----------------------------------------------------------------------
+ℹ tests 38
+ℹ pass 27
+ℹ fail 11
+
+Permisos indebidos (9): la regla anterior aceptaba la operación.
+  - hallazgo de revisión #2: tampoco lee sus ítems
+  - hallazgo de revisión #2: tampoco lee su historial
+  - un emisor no puede aprobar su propio borrador
+  - el contador no puede cambiar el contenido al revisar
+  - no se puede cambiar el número ni el proveedor de una factura
+  - la marca de tiempo debe ser la del servidor
+  - un emisor no puede escribir eventos en la factura de otro
+  - no se puede registrar un estado distinto al de la factura
+  - no se puede fechar un evento en el pasado
+
+Operaciones legítimas bloqueadas (2): la regla anterior las rechazaba.
+  - crear factura, ítem y evento en un mismo lote se acepta
+  - el dueño elimina su borrador con ítems e historial
