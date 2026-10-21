@@ -1,0 +1,33 @@
+name: Issue 33 - Django Firestore (sin credenciales cloud)
+
+on:
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements_firestore.txt
+      - name: Instalar dependencias
+        run: python -m pip install -r backend/requirements_firestore.txt
+      - name: Verificar Django
+        env:
+          DJANGO_DEBUG: 'true'
+          FIRESTORE_PROJECT: facturaflow-mcc-2026
+        run: python backend/manage_firestore.py check
+      - name: Pruebas de validaciones, sin escribir Firestore
+        env:
+          DJANGO_DEBUG: 'true'
+          FIRESTORE_PROJECT: facturaflow-mcc-2026
+        run: python backend/manage_firestore.py test cloud_api --verbosity 2
