@@ -1,0 +1,57 @@
+name: Taller 7 - Flutter CI y APK demo
+
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality-and-apk:
+    name: Analisis, pruebas y APK de demostracion
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Configurar Flutter 3.47.2
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.2'
+          cache: true
+
+      - name: Verificar versiones
+        run: flutter --version
+
+      - name: Instalar dependencias
+        run: flutter pub get
+
+      - name: Analisis estatico
+        run: flutter analyze
+
+      - name: Pruebas automatizadas
+        run: flutter test
+
+      - name: Compilar APK de demostracion
+        run: flutter build apk --release --dart-define=DEMO_MODE=true
+
+      - name: Publicar APK como artefacto de CI
+        uses: actions/upload-artifact@v4
+        with:
+          name: facturaflow-taller7-apk-demo
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 7
