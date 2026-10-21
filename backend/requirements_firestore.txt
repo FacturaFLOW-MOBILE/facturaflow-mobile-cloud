@@ -1,0 +1,4 @@
+Django>=5.2,<5.3
+google-cloud-firestore>=2.19,<3
+python-dotenv>=1.0,<2
+gunicorn>=22,<24

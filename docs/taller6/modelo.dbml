@@ -1,0 +1,123 @@
+// =====================================================================
+// FacturaFlow Mobile Cloud — Modelo lógico en DBML
+// Actividad Evaluable 06
+//
+// Fuente editable del diagrama ER. Se renderiza en https://dbdiagram.io
+// (Import > DBML) para obtener el diagrama en PNG/PDF de alta resolución.
+// =====================================================================
+
+Project facturaflow {
+  database_type: 'PostgreSQL'
+  Note: '''
+    Modelo de datos de FacturaFlow Mobile Cloud.
+    Derivado del dominio real de la aplicación Flutter (lib/data/models/)
+    y del contrato REST implementado en el PR #51.
+  '''
+}
+
+Enum user_role {
+  emisor        [note: 'Crea y envía sus propias facturas']
+  contador      [note: 'Revisa la cola enviada: aprueba o rechaza']
+  administrador [note: 'Ambas capacidades y visibilidad total']
+}
+
+Enum invoice_status {
+  borrador  [note: 'Editable por su emisor']
+  enviada   [note: 'En revisión del contador']
+  aprobada  [note: 'Estado final']
+  rechazada [note: 'Devuelta con motivo; puede reabrirse']
+}
+
+Table app_user {
+  id            uuid         [pk, default: `gen_random_uuid()`]
+  full_name     varchar(120) [not null]
+  email         varchar(254) [not null, unique]
+  password_hash varchar(255) [not null, note: 'Hash, nunca la contraseña en claro']
+  role          user_role    [not null, default: 'emisor']
+  is_active     boolean      [not null, default: true]
+  created_at    timestamptz  [not null, default: `now()`]
+  updated_at    timestamptz  [not null, default: `now()`]
+
+  Note: 'Usuarios autenticados. El rol determina los permisos del flujo.'
+}
+
+Table supplier {
+  id         uuid         [pk, default: `gen_random_uuid()`]
+  tax_id     varchar(20)  [not null, unique, note: 'NIT del proveedor']
+  name       varchar(160) [not null]
+  created_at timestamptz  [not null, default: `now()`]
+
+  Note: 'Proveedor emisor. Normalizado fuera de invoice por el Issue #41.'
+}
+
+Table invoice {
+  id               uuid           [pk, default: `gen_random_uuid()`]
+  number           varchar(40)    [not null, note: 'Consecutivo del proveedor']
+  supplier_id      uuid           [not null, ref: > supplier.id]
+  issue_date       date           [not null]
+  status           invoice_status [not null, default: 'borrador']
+  created_by_id    uuid           [not null, ref: > app_user.id]
+  notes            text           [not null, default: '']
+  rejection_reason text           [null, note: 'Mínimo 10 caracteres; NULL salvo rechazada']
+  created_at       timestamptz    [not null, default: `now()`]
+  updated_at       timestamptz    [not null, default: `now()`]
+
+  indexes {
+    (number, supplier_id) [unique, name: 'uq_invoice_number_supplier']
+    status                [name: 'ix_invoice_status']
+    created_by_id         [name: 'ix_invoice_created_by']
+    supplier_id           [name: 'ix_invoice_supplier']
+    updated_at            [name: 'ix_invoice_updated_at']
+  }
+
+  Note: 'Factura y su estado en el flujo de aprobación.'
+}
+
+Table invoice_item {
+  id               uuid         [pk, default: `gen_random_uuid()`]
+  invoice_id       uuid         [not null, ref: > invoice.id]
+  line_number      smallint     [not null]
+  description      varchar(255) [not null]
+  quantity         integer      [not null, note: '> 0']
+  unit_price_cents bigint       [not null, note: '> 0, importe en centavos']
+  tax_rate         numeric(5,4) [not null, default: 0.19, note: 'Entre 0 y 1']
+
+  indexes {
+    (invoice_id, line_number) [unique, name: 'uq_invoice_item_line']
+    invoice_id                [name: 'ix_invoice_item_invoice']
+  }
+
+  Note: 'Línea de detalle. Se elimina en cascada con la factura.'
+}
+
+Table invoice_event {
+  id          uuid           [pk, default: `gen_random_uuid()`]
+  invoice_id  uuid           [not null, ref: > invoice.id]
+  actor_id    uuid           [not null, ref: > app_user.id]
+  status      invoice_status [not null]
+  description varchar(255)   [not null]
+  comment     text           [null]
+  occurred_at timestamptz    [not null, default: `now()`]
+
+  indexes {
+    (invoice_id, occurred_at) [name: 'ix_invoice_event_invoice']
+    actor_id                  [name: 'ix_invoice_event_actor']
+  }
+
+  Note: 'Bitácora append-only. Conserva el motivo del rechazo tras reabrir (Issue #42).'
+}
+
+Table auth_session {
+  id         uuid         [pk, default: `gen_random_uuid()`]
+  user_id    uuid         [not null, ref: > app_user.id]
+  token_hash varchar(255) [not null, unique]
+  issued_at  timestamptz  [not null, default: `now()`]
+  expires_at timestamptz  [not null]
+  revoked_at timestamptz  [null]
+
+  indexes {
+    user_id [name: 'ix_auth_session_user']
+  }
+
+  Note: 'Sesión emitida por POST /auth/login. Se guarda el hash del token.'
+}

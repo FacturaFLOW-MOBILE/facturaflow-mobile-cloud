@@ -1,0 +1,113 @@
+SET
+================ PRUEBA 2: existencia de tablas ================
+  table_name   
+---------------
+ app_user
+ auth_session
+ invoice
+ invoice_event
+ invoice_item
+ supplier
+(6 rows)
+
+================ PRUEBA 3: llaves primarias ====================
+  table_name   | column_name |  constraint_name   
+---------------+-------------+--------------------
+ app_user      | id          | app_user_pkey
+ auth_session  | id          | auth_session_pkey
+ invoice       | id          | invoice_pkey
+ invoice_event | id          | invoice_event_pkey
+ invoice_item  | id          | invoice_item_pkey
+ supplier      | id          | supplier_pkey
+(6 rows)
+
+================ PRUEBA 4: llaves foraneas =====================
+ tabla_origen  |    columna    | tabla_destino | columna_destino | al_borrar 
+---------------+---------------+---------------+-----------------+-----------
+ auth_session  | user_id       | app_user      | id              | CASCADE
+ invoice       | created_by_id | app_user      | id              | RESTRICT
+ invoice       | supplier_id   | supplier      | id              | RESTRICT
+ invoice_event | actor_id      | app_user      | id              | RESTRICT
+ invoice_event | invoice_id    | invoice       | id              | CASCADE
+ invoice_item  | invoice_id    | invoice       | id              | CASCADE
+(6 rows)
+
+================ PRUEBA 6: insercion de datos ==================
+INSERT 0 2
+INSERT 0 2
+INSERT 0 1
+INSERT 0 2
+INSERT 0 1
+                            prueba_6                            
+----------------------------------------------------------------
+ PASA — 2 usuarios, 2 proveedores, 1 factura, 2 items, 1 evento
+(1 row)
+
+================ PRUEBA 7: consulta con JOIN y totales =========
+ number  |    proveedor    |     nit     | creada_por |  status  | subtotal_cents | tax_cents | total_cents 
+---------+-----------------+-------------+------------+----------+----------------+-----------+-------------
+ FE-1001 | Papeleria La 45 | 900123456-7 | Ana Torres | borrador |       71200000 |  13528000 |    84728000
+(1 row)
+
+================ PRUEBA 10a: FK invalida debe fallar ===========
+NOTICE:  PASA — integridad referencial: rechaza supplier_id inexistente
+DO
+================ PRUEBA 14a: Issue #41 numero+NIT ==============
+NOTICE:  PASA — dos proveedores distintos pueden usar FE-1001
+DO
+NOTICE:  PASA — rechaza FE-1001 repetida en el mismo proveedor
+DO
+================ PRUEBA 14b: Issue #40 motivo >= 10 ============
+NOTICE:  PASA — rechaza un motivo de rechazo demasiado corto
+DO
+================ PRUEBA 8: actualizacion (rechazo valido) ======
+UPDATE 1
+INSERT 0 1
+ number  |  status   |         rejection_reason         
+---------+-----------+----------------------------------
+ FE-1001 | rechazada | Falta la orden de compra firmada
+(1 row)
+
+================ PRUEBA 14c: Issue #42 reabrir limpia motivo ===
+NOTICE:  PASA — no permite un borrador con motivo de rechazo
+DO
+UPDATE 1
+               prueba_14c                
+-----------------------------------------
+ PASA — reabierta: borrador, motivo=NULL
+(1 row)
+
+================ PRUEBA 10b: historial sobrevive (Issue #42) ===
+          occurred_at          |  status   |        description        |             comment              
+-------------------------------+-----------+---------------------------+----------------------------------
+ 2026-10-14 02:39:07.484336+00 | borrador  | Factura creada            | 
+ 2026-10-14 02:39:07.523318+00 | rechazada | Rechazada por Carlos Ruiz | Falta la orden de compra firmada
+(2 rows)
+
+================ PRUEBA 14d: validaciones de item ==============
+NOTICE:  PASA — rechaza quantity <= 0
+DO
+================ PRUEBA 14e: email unico =======================
+NOTICE:  PASA — rechaza correo duplicado
+DO
+================ PRUEBA 9: borrado en cascada ==================
+ items_antes 
+-------------
+           2
+(1 row)
+
+DELETE 1
+ items_despues 
+---------------
+             0
+(1 row)
+
+================ PRUEBA 10c: RESTRICT protege catalogos ========
+NOTICE:  PASA — RESTRICT impide borrar un proveedor con facturas
+DO
+================ RESUMEN =======================================
+ usuarios | proveedores | facturas | items | eventos 
+----------+-------------+----------+-------+---------
+        2 |           2 |        1 |     0 |       0
+(1 row)
+
